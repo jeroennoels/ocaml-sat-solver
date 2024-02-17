@@ -8,12 +8,12 @@ let%test "words" =
   && eq (Util.words "\t-51 9 -243 88  0\t") [ "-51"; "9"; "-243"; "88"; "0" ]
 ;;
 
-let%test "startsWith" =
-  let p str = Util.startsWith str 'a' in
+let%test "starts_with" =
+  let p str = Util.starts_with str 'a' in
   p "abc" && p "a" && (not (p "")) && not (p "xyz")
 ;;
 
-let failWithMessage x y =
+let fail_with_message x y =
   print_endline (x ^ " " ^ y);
   false
 ;;
@@ -21,16 +21,16 @@ let failWithMessage x y =
 let dimacs_expect_ok lines (verifier : Dimacs.t -> bool) =
   match Dimacs.read_lines lines with
   | Ok p -> verifier p
-  | Error msg -> failWithMessage "error:" msg
+  | Error msg -> fail_with_message "error:" msg
 ;;
 
 let dimacs_expect_error lines expected_msg =
   match Dimacs.read_lines lines with
-  | Ok _ -> failWithMessage "undetected error case, expecting:" expected_msg
+  | Ok _ -> fail_with_message "undetected error case, expecting:" expected_msg
   | Error msg ->
     if String.equal msg expected_msg
     then true
-    else failWithMessage "wrong error message:" msg
+    else fail_with_message "wrong error message:" msg
 ;;
 
 let%test "dimacs ok" =
@@ -49,7 +49,7 @@ let%test "dimacs ok" =
     && String.equal (Dimacs.clauses formula).(2) "-4 -3 0")
 ;;
 
-let%test "dimacs error: missing p line" =
+let%test "dimacs error: missing problem line" =
   let cnf = [ "1 -2 4 0" ] in
   dimacs_expect_error cnf "missing problem line"
 ;;

@@ -9,8 +9,8 @@ type t =
 let num_variables t = t.num_variables
 let num_clauses t = Array.length t.clauses
 let clauses t = t.clauses
-let is_problem line = Util.startsWith line 'p'
-let is_comment line = Util.startsWith line 'c'
+let is_problem line = Util.starts_with line 'p'
+let is_comment line = Util.starts_with line 'c'
 
 let parse_problem line : (t, string) Result.t =
   match Util.words line with

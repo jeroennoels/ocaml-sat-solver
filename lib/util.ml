@@ -5,4 +5,4 @@ let words text =
   List.filter ~f:(Fn.non String.is_empty) split
 ;;
 
-let startsWith str c = (not (String.is_empty str)) && Char.equal str.[0] c
+let starts_with str c = (not (String.is_empty str)) && Char.equal str.[0] c

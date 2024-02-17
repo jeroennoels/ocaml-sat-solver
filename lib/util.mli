@@ -1,4 +1,4 @@
 open! Base
 
 val words : string -> string list
-val startsWith : string -> char -> bool
+val starts_with : string -> char -> bool
