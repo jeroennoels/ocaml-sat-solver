@@ -1,1 +1,1 @@
-# ocaml-sat-solver
+I am going to write a CDCL sat-solver to learn OCaml.
