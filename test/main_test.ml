@@ -46,7 +46,7 @@ let%test "dimacs ok" =
   dimacs_expect_ok cnf (fun formula ->
     Dimacs.num_clauses formula = 3
     && Dimacs.num_variables formula = 5
-    && List.equal Int.equal (Dimacs.clauses formula).(1) [ 5; -3; 2 ])
+    && List.equal Int.equal (Array.to_list (Dimacs.clauses formula).(1)) [ 5; -3; 2 ])
 ;;
 
 let%test "dimacs error: missing problem line" =

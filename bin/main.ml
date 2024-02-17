@@ -2,7 +2,9 @@ open! Base
 open Stdio
 open Sat
 
-let show clause = String.concat ~sep:" " (List.map ~f:Int.to_string clause)
+let show clause =
+  String.concat ~sep:" " (List.map ~f:Int.to_string (Array.to_list clause))
+;;
 
 let () =
   let args = Sys.get_argv () in
