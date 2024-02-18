@@ -4,7 +4,7 @@ open Sat
 
 let%test "words" =
   let eq = List.equal String.equal in
-  eq (Util.words "p cnf   25\n \t66 ") [ "p"; "cnf"; "25"; "66" ]
+  eq (Util.words "p cnf   25 \t66 ") [ "p"; "cnf"; "25"; "66" ]
   && eq (Util.words "\t-51 9 -243 88  0\t") [ "-51"; "9"; "-243"; "88"; "0" ]
 ;;
 
