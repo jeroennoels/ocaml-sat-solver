@@ -21,14 +21,18 @@ let parse_problem line : (t, string) Result.t =
   | _ -> Error "invalid problem header"
 ;;
 
+(** Assume literals are separated by single spaces. *)
 let parse_clause line =
-  let ws = Util.words line in
-  let len = List.length ws - 1 in
+  let tokens = String.split line ~on:' ' in
+  let len = List.length tokens - 1 in
   if len < 1
   then None
   else (
     let clause = Array.create ~len 0 in
-    List.iteri ws ~f:(fun i w -> if i < len then clause.(i) <- Int.of_string w);
+    List.iteri tokens ~f:(fun i token ->
+      if i < len
+      then clause.(i) <- Int.of_string token
+      else assert (String.equal token "0"));
     Some clause)
 ;;
 
