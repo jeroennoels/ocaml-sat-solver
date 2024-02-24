@@ -73,6 +73,6 @@ let to_result : accumulator -> (t, string) Result.t = function
 let read_lines lines = List.fold lines ~init:Intro ~f:accumulate |> to_result
 
 let read_file filename =
-  let parse = Core.In_channel.fold_lines ~init:Intro ~f:accumulate in
-  Core.In_channel.with_file filename ~f:parse |> to_result
+  let parse = Stdio.In_channel.fold_lines ~init:Intro ~f:accumulate in
+  Stdio.In_channel.with_file filename ~f:parse |> to_result
 ;;
