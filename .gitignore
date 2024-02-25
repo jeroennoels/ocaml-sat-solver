@@ -30,6 +30,8 @@ _opam/
 
 # emacs
 *~
+.\#*
+\#*\#
 
 # sat
 cnf/
