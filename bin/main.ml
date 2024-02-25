@@ -12,6 +12,11 @@ let () =
   match Dimacs.read_file filename with
   | Ok result ->
     printf "Number of variables: %d\n" (Dimacs.num_variables result);
-    printf "Clause: %s\n" (show (Dimacs.clauses result).(0))
+    printf "Number of clauses: %d\n" (Dimacs.num_clauses result);
+    printf
+      "Clauses:\n%s\n%s\n...\n%s\n"
+      (show (Dimacs.clauses result).(0))
+      (show (Dimacs.clauses result).(1))
+      (show (Dimacs.clauses result).(Dimacs.num_clauses result - 1))
   | Error msg -> print_endline msg
 ;;
