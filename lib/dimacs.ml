@@ -17,10 +17,10 @@ type p_line =
   ; nbclauses : int
   }
 
-let parse_problem line : (p_line, string) Result.t =
+let parse_p_line line : (p_line, string) Result.t =
   match Util.words line with
   | [ "p"; "cnf"; v; c ] -> Ok { nbvar = Int.of_string v; nbclauses = Int.of_string c }
-  | _ -> Error "invalid problem header"
+  | _ -> Error "invalid p line"
 ;;
 
 let initialize { nbvar; nbclauses } : t =
@@ -52,10 +52,10 @@ let accumulate : accumulator -> string -> accumulator =
   match acc with
   | Intro when is_comment line -> Intro
   | Intro when is_problem line ->
-    (match parse_problem line with
+    (match parse_p_line line with
      | Ok p_line -> Build (initialize p_line)
      | Error msg -> Fail msg)
-  | Intro -> Fail "missing problem line"
+  | Intro -> Fail "missing p line"
   | Build t when t.count >= num_clauses t -> Fail "too many clauses"
   | Build t as build ->
     (match parse_clause line with
@@ -73,7 +73,7 @@ let to_result : accumulator -> (t, string) Result.t = function
     assert (t.count < num_clauses t);
     Error "not enough clauses"
   | Fail msg -> Result.fail msg
-  | Intro -> Result.fail "missing problem header"
+  | Intro -> assert false
 ;;
 
 let read_lines lines = List.fold lines ~init:Intro ~f:accumulate |> to_result
