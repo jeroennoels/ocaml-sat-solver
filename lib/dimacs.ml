@@ -11,14 +11,22 @@ let num_clauses t = Array.length t.clauses
 let clauses t = t.clauses
 let is_problem line = Util.starts_with line 'p'
 let is_comment line = Util.starts_with line 'c'
-let empty = Array.create ~len:0 0
 
-let parse_problem line : (t, string) Result.t =
+type p_line =
+  { nbvar : int
+  ; nbclauses : int
+  }
+
+let parse_problem line =
   match Util.words line with
-  | [ "p"; "cnf"; v; c ] ->
-    let len = Int.of_string c in
-    Ok { num_variables = Int.of_string v; clauses = Array.create ~len empty; count = 0 }
+  | [ "p"; "cnf"; v; c ] -> Ok { nbvar = Int.of_string v; nbclauses = Int.of_string c }
   | _ -> Error "invalid problem header"
+;;
+
+let initialize { nbvar; nbclauses } =
+  let empty = Array.create ~len:0 0 in
+  let clauses = Array.create ~len:nbclauses empty in
+  { num_variables = nbvar; clauses; count = 0 }
 ;;
 
 (** Assume literals are separated by single spaces. *)
@@ -47,7 +55,7 @@ let accumulate : accumulator -> string -> accumulator =
   | Intro when is_comment line -> Intro
   | Intro when is_problem line ->
     (match parse_problem line with
-     | Ok t -> Build t
+     | Ok p_line -> Build (initialize p_line)
      | Error msg -> Fail msg)
   | Intro -> Fail "missing problem line"
   | Build t when t.count >= num_clauses t -> Fail "too many clauses"
