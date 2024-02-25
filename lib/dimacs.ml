@@ -33,15 +33,13 @@ let initialize { nbvar; nbclauses } : t =
 let parse_clause line : int array option =
   let tokens = String.split line ~on:' ' in
   let len = List.length tokens - 1 in
-  if len < 1
-  then None
-  else (
-    let clause = Array.create ~len 0 in
-    List.iteri tokens ~f:(fun i token ->
-      if i < len
-      then clause.(i) <- Int.of_string token
-      else assert (String.equal token "0"));
-    Some clause)
+  let terminated = ref false in
+  let clause = Array.create ~len 0 in
+  List.iteri tokens ~f:(fun i token ->
+    if i < len
+    then clause.(i) <- Int.of_string token
+    else terminated := String.equal token "0");
+  if !terminated && len > 0 then Some clause else None
 ;;
 
 type accumulator =
