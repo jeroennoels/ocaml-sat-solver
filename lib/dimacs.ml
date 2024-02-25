@@ -17,20 +17,20 @@ type p_line =
   ; nbclauses : int
   }
 
-let parse_problem line =
+let parse_problem line : (p_line, string) Result.t =
   match Util.words line with
   | [ "p"; "cnf"; v; c ] -> Ok { nbvar = Int.of_string v; nbclauses = Int.of_string c }
   | _ -> Error "invalid problem header"
 ;;
 
-let initialize { nbvar; nbclauses } =
+let initialize { nbvar; nbclauses } : t =
   let empty = Array.create ~len:0 0 in
   let clauses = Array.create ~len:nbclauses empty in
   { num_variables = nbvar; clauses; count = 0 }
 ;;
 
 (** Assume literals are separated by single spaces. *)
-let parse_clause line =
+let parse_clause line : int array option =
   let tokens = String.split line ~on:' ' in
   let len = List.length tokens - 1 in
   if len < 1
