@@ -15,7 +15,7 @@ let expect_ok lines (verifier : Dimacs.t -> bool) =
 
 let expect_error lines expected_msg =
   match Dimacs.read_lines lines with
-  | Ok _ -> fail_with_message "undetected error case, expecting:" expected_msg
+  | Ok _ -> fail_with_message "success while expecting error:" expected_msg
   | Error msg ->
     if String.equal msg expected_msg
     then true
@@ -31,11 +31,15 @@ let%test "dimacs ok" =
     ; "5 -3 2 0"
     ; "-4 -3 0"
     ]
-  in
-  expect_ok cnf (fun formula ->
+  and verifier formula =
     Dimacs.num_clauses formula = 3
     && Dimacs.num_variables formula = 5
-    && List.equal Int.equal (Array.to_list (Dimacs.clauses formula).(1)) [ 5; -3; 2 ])
+    && Array.equal
+         (Array.equal Int.equal)
+         (Dimacs.clauses formula)
+         [| [| 1; -2; 4 |]; [| 5; -3; 2 |]; [| -4; -3 |] |]
+  in
+  expect_ok cnf verifier
 ;;
 
 let%test "missing p line" =
