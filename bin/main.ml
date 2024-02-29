@@ -11,6 +11,7 @@ let () =
   let filename = args.(1) in
   match Dimacs.read_file filename with
   | Ok result ->
+    Verify_input.verify result;
     printf "Number of variables: %d\n" (Dimacs.num_variables result);
     printf "Number of clauses: %d\n" (Dimacs.num_clauses result);
     printf
