@@ -12,7 +12,7 @@ let verify dimacs =
   in
   Array.iter (Dimacs.clauses dimacs) ~f:(fun clause -> Array.iter clause ~f:seen);
   let find_false arr = Option.map ~f:fst (Array.findi arr ~f:(fun _ b -> not b)) in
-  let fail_missing x = failwith ("missing litteral: " ^ Int.to_string x) in
+  let fail_missing x = failwith ("missing literal: " ^ Int.to_string x) in
   match find_false pos, find_false neg with
   | Some x, _ -> fail_missing x
   | _, Some x -> fail_missing (-x)
