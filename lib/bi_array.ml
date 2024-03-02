@@ -1,33 +1,31 @@
 open! Base
 
-type 'a t =
-  { neg : 'a array
-  ; pos : 'a array
-  }
+type 'a t = 'a array
 
-let create ~half_len init =
-  let alloc = Array.create ~len:half_len in
-  { neg = alloc init; pos = alloc init }
+let create ~half a = Array.create ~len:(2 * half) a
+
+let encode t = function
+  | 0 -> invalid_arg "zero is not a valid index"
+  | i -> (Array.length t / 2) + if i > 0 then i - 1 else i
 ;;
 
-let to_assoc b =
-  let x = Array.mapi b.neg ~f:(fun i a -> -i - 1, a) |> Array.to_list
-  and y = Array.mapi b.pos ~f:(fun i a -> i + 1, a) |> Array.to_list in
-  List.append x y
+let decode t i =
+  let half = Array.length t / 2 in
+  if i < half then i - half else i - half + 1
 ;;
 
-let update b i a =
-  match i with
-  | i when i > 0 -> b.pos.(i - 1) <- a
-  | 0 -> failwith "zero is not a valid index"
-  | i -> b.neg.(-i - 1) <- a
+let to_assoc t =
+  let f i a = decode t i, a in
+  Array.to_list (Array.mapi t ~f)
 ;;
 
-let findi b ~f =
-  match Array.findi b.pos ~f:(fun j a -> f (j + 1) a) with
-  | Some (i, a) -> Some (i + 1, a)
-  | None ->
-    (match Array.findi b.neg ~f:(fun j a -> f (-j - 1) a) with
-     | Some (i, a) -> Some (-i - 1, a)
-     | None -> None)
+let update t i a = t.(encode t i) <- a
+
+let findi t ~f =
+  let f i a = f (decode t i) a in
+  match Array.findi t ~f with
+  | Some (i, a) -> Some (decode t i, a)
+  | None -> None
 ;;
+
+let identity t i = decode t (encode t i)
