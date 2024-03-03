@@ -7,9 +7,7 @@ type t =
   ; mutable count : int
   }
 
-let num_variables t = t.num_variables
 let num_clauses t = Array.length t.clauses
-let clauses t = t.clauses
 let is_problem line = Util.starts_with line 'p'
 let is_comment line = Util.starts_with line 'c'
 
@@ -68,8 +66,9 @@ let accumulate : accumulator -> string -> accumulator =
   | Fail _ as fail -> fail
 ;;
 
-let to_result : accumulator -> (t, string) Result.t = function
-  | Build t when t.count = num_clauses t -> Ok t
+let to_result : accumulator -> (Cnf_formula.t, string) Result.t = function
+  | Build t when t.count = num_clauses t ->
+    Ok (Cnf_formula.create t.num_variables t.clauses)
   | Build t ->
     assert (t.count < num_clauses t);
     Error "not enough clauses"

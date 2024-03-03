@@ -8,9 +8,9 @@ let assert_invalid_cnf lines expected_message =
   | Error msg ->
     print_endline (message_str "error reading dimacs" msg);
     false
-  | Ok dimacs ->
+  | Ok cnf ->
     (try
-       Verify_input.verify dimacs;
+       Verify_input.verify cnf;
        false
      with
      | Verify_input.Invalid_cnf msg ->
