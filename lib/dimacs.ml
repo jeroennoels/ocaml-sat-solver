@@ -66,9 +66,8 @@ let accumulate : accumulator -> string -> accumulator =
   | Fail _ as fail -> fail
 ;;
 
-let to_result : accumulator -> (Cnf_formula.t, string) Result.t = function
-  | Build t when t.count = num_clauses t ->
-    Ok (Cnf_formula.create t.num_variables t.clauses)
+let to_result : accumulator -> (Cnf.t, string) Result.t = function
+  | Build t when t.count = num_clauses t -> Ok (Cnf.create t.num_variables t.clauses)
   | Build t ->
     assert (t.count < num_clauses t);
     Error "not enough clauses"

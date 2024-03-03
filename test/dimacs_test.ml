@@ -8,7 +8,7 @@ let fail_with_message text arg =
   false
 ;;
 
-let expect_ok lines (verifier : Cnf_formula.t -> bool) =
+let expect_ok lines (verifier : Cnf.t -> bool) =
   match Dimacs.read_lines lines with
   | Ok cnf -> verifier cnf
   | Error msg -> fail_with_message "error" msg
@@ -33,11 +33,11 @@ let%test "dimacs ok" =
     ; "-4 -3 0"
     ]
   and verifier formula =
-    Cnf_formula.num_clauses formula = 3
-    && Cnf_formula.num_variables formula = 5
+    Cnf.num_clauses formula = 3
+    && Cnf.num_variables formula = 5
     && Array.equal
          (Array.equal Int.equal)
-         (Cnf_formula.clauses formula)
+         (Cnf.clauses formula)
          [| [| 1; -2; 4 |]; [| 5; -3; 2 |]; [| -4; -3 |] |]
   in
   expect_ok cnf verifier

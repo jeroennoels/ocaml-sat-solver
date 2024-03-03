@@ -35,7 +35,7 @@ let check clause =
 ;;
 
 let verify cnf =
-  let nbvar = Cnf_formula.num_variables cnf in
+  let nbvar = Cnf.num_variables cnf in
   let literals = Bi_array.create ~half:nbvar false in
   let seen x =
     if x = 0 || Int.abs x > nbvar
@@ -46,7 +46,7 @@ let verify cnf =
     check clause;
     Array.iter clause ~f:seen
   in
-  Array.iter (Cnf_formula.clauses cnf) ~f:process;
+  Array.iter (Cnf.clauses cnf) ~f:process;
   match Bi_array.findi literals ~f:(fun _ b -> not b) with
   | Some (x, _) -> invalid_cnf (message_int "missing literal" x)
   | None -> ()
