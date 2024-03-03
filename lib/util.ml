@@ -1,5 +1,9 @@
 open! Base
 
+let show int_array =
+  String.concat ~sep:" " (List.map ~f:Int.to_string (Array.to_list int_array))
+;;
+
 let words line =
   line
   |> String.split_on_chars ~on:[ ' '; '\t' ]
