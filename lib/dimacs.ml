@@ -1,4 +1,5 @@
 open! Base
+open Message
 
 type t =
   { num_variables : int
@@ -63,7 +64,7 @@ let accumulate : accumulator -> string -> accumulator =
        t.clauses.(t.count) <- clause;
        t.count <- t.count + 1;
        build
-     | None -> Fail ("invalid clause line: " ^ line))
+     | None -> Fail (message_str "invalid clause line" line))
   | Fail _ as fail -> fail
 ;;
 

@@ -1,21 +1,22 @@
 open! Base
 open Stdio
 open Sat
+open Sat.Message
 
-let fail_with_message x y =
-  print_endline (x ^ " " ^ y);
+let fail_with_message text arg =
+  print_endline (message_str text arg);
   false
 ;;
 
 let expect_ok lines (verifier : Dimacs.t -> bool) =
   match Dimacs.read_lines lines with
   | Ok p -> verifier p
-  | Error msg -> fail_with_message "error:" msg
+  | Error msg -> fail_with_message "error" msg
 ;;
 
 let expect_error lines expected_msg =
   match Dimacs.read_lines lines with
-  | Ok _ -> fail_with_message "success while expecting error:" expected_msg
+  | Ok _ -> fail_with_message "success while expecting error" expected_msg
   | Error msg ->
     if String.equal msg expected_msg
     then true
@@ -59,10 +60,10 @@ let%test "too many clauses" =
 
 let%test "non terminated clause" =
   let cnf = [ "p cnf 3 2"; "1 2 0"; "1 -3 2" ] in
-  expect_error cnf "invalid clause line: 1 -3 2"
+  expect_error cnf (message_str "invalid clause line" "1 -3 2")
 ;;
 
 let%test "empty clause" =
   let cnf = [ "p cnf 3 2"; "1 2 0"; "0" ] in
-  expect_error cnf "invalid clause line: 0"
+  expect_error cnf (message_str "invalid clause line" "0")
 ;;
