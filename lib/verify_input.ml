@@ -1,20 +1,18 @@
 open! Base
 
+let message text literal = text ^ ": " ^ Int.to_string literal
+
 let verify dimacs =
-  let len = Dimacs.num_variables dimacs in
-  let pos = Array.create ~len false in
-  let neg = Array.create ~len false in
+  let nbvar = Dimacs.num_variables dimacs in
+  let literals = Bi_array.create ~half:nbvar false in
   let seen x =
-    if x = 0 || Int.abs x > len then failwith ("literal out of range: " ^ Int.to_string x);
-    let arr = if x > 0 then pos else neg in
-    let i = Int.abs x - 1 in
-    arr.(i) <- true
+    if x = 0 || Int.abs x > nbvar
+    then invalid_arg (message "literal out of range" x)
+    else Bi_array.update literals x true
   in
-  Array.iter (Dimacs.clauses dimacs) ~f:(fun clause -> Array.iter clause ~f:seen);
-  let find_false arr = Option.map ~f:fst (Array.findi arr ~f:(fun _ b -> not b)) in
-  let fail_missing x = failwith ("missing literal: " ^ Int.to_string x) in
-  match find_false pos, find_false neg with
-  | Some x, _ -> fail_missing x
-  | _, Some x -> fail_missing (-x)
-  | None, None -> ()
+  let process clause = Array.iter clause ~f:seen in
+  Array.iter (Dimacs.clauses dimacs) ~f:process;
+  match Bi_array.findi literals ~f:(fun _ b -> not b) with
+  | Some (x, _) -> failwith (message "missing literal" x)
+  | None -> ()
 ;;
