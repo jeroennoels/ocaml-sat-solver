@@ -18,6 +18,11 @@ let sample_cnf =
   cnf
 ;;
 
+let sample_literal x =
+  let nbvar = Cnf.num_variables sample_cnf in
+  Literal.of_int_check nbvar x
+;;
+
 let database = Database.create sample_cnf
 let clause_id = Clause_id.of_int
 let equal_int_arrays = Array.equal Int.equal
@@ -28,10 +33,16 @@ let is_unboxed_int x =
   Stdlib.Obj.is_int r && not (Stdlib.Obj.is_block r)
 ;;
 
-let%test "unboxed" =
+let%test "unboxed literal" =
   let clause = Database.get_clause database (clause_id 0) in
   let x = clause.(0) in
   Literal.to_int x = 2 && is_unboxed_int x
+;;
+
+let%test "unboxed clause_id" =
+  let cids = Database.relevant_clauses database (sample_literal 6) in
+  let cid = cids.(0) in
+  Clause_id.to_int cid = 6 && is_unboxed_int cid
 ;;
 
 let%test "get clause" =
@@ -40,13 +51,14 @@ let%test "get clause" =
 ;;
 
 let%test "relevant clauses" =
-  let nbvar = Cnf.num_variables sample_cnf in
-  let clause_id_ints x =
-    Database.relevant_clauses database (Literal.of_int_check nbvar x)
+  let run x =
+    sample_literal x
+    |> Database.relevant_clauses database
     |> Array.map ~f:Clause_id.to_int
     |> int_array_sorted
   in
-  equal_int_arrays [| 0; 1; 3; 5 |] (clause_id_ints 2)
-  && equal_int_arrays [| 2 |] (clause_id_ints (-2))
-  && equal_int_arrays [| 0; 4; 5 |] (clause_id_ints (-3))
+  equal_int_arrays [| 0; 1; 3; 5 |] (run (-2))
+  && equal_int_arrays [| 2 |] (run 2)
+  && equal_int_arrays [| 0; 4; 5 |] (run 3)
+  && equal_int_arrays [| 2; 5 |] (run (-5))
 ;;

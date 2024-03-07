@@ -14,7 +14,7 @@ type t =
 let get_clause t i = t.clauses.(Clause_id.to_int i)
 
 let relevant_clauses t x =
-  let arr = if Literal.is_positive x then t.positive else t.negative in
+  let arr = if Literal.is_positive x then t.negative else t.positive in
   let v = Variable.of_literal x in
   arr.(Variable.to_int v)
 ;;
