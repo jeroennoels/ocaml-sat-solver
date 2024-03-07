@@ -19,7 +19,7 @@ let sample_cnf =
 ;;
 
 let database = Database.create sample_cnf
-let clause_id = Clause_id.of_int_check
+let clause_id = Clause_id.of_int
 let equal_int_arrays = Array.equal Int.equal
 
 let is_unboxed_int x =

@@ -21,7 +21,7 @@ let run cnf =
   show_cnf_summary cnf;
   let database = Database.create cnf in
   let nbvar = Cnf.num_variables cnf in
-  let i = Clause_id.of_int_check 45 in
+  let i = Clause_id.of_int 45 in
   print_endline "----------------------------";
   print_endline @@ show_clause (Database.get_clause database i);
   let x = Literal.of_int_check nbvar 58 in
