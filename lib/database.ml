@@ -4,10 +4,20 @@ type variable = Variable.t
 type literal = Literal.t
 type clause_id = Clause_id.t
 type clause = literal array
-type t = { clauses : clause array }
+
+type t =
+  { clauses : clause array
+  ; positive : clause_id array array
+  ; negative : clause_id array array
+  }
 
 let get_clause t i = t.clauses.(Clause_id.to_int i)
-let relevant_clauses _ _ = Array.create ~len:1 (Clause_id.of_int 0)
+
+let relevant_clauses t x =
+  let arr = if Literal.is_positive x then t.positive else t.negative in
+  let v = Variable.of_literal x in
+  arr.(Variable.to_int v)
+;;
 
 let typeful_clauses cnf : clause array =
   let nbvar = Cnf.num_variables cnf in
@@ -19,8 +29,6 @@ let push (arr : clause_id list array) (v : variable) (cid : clause_id) =
   arr.(Variable.to_int v) <- cid :: arr.(Variable.to_int v)
 ;;
 
-let empty : clause_id list = []
-
 (** The list [neg.(i)] holds variables that occur negatively in clause [i].
     Likewise for [pos] and positive occurrences.
     Position [i = 0] is wasted to avoid the offset. *)
@@ -30,7 +38,9 @@ let array_iter_cid ~f (arr : clause array) =
   Array.iteri ~f arr
 ;;
 
-let index cnf (clauses : clause array) =
+let empty : clause_id list = []
+
+let index_all cnf (clauses : clause array) =
   let len = Cnf.num_variables cnf + 1 in
   let neg = Array.create ~len empty in
   let pos = Array.create ~len empty in
@@ -40,11 +50,12 @@ let index cnf (clauses : clause array) =
   in
   let index_clause cid clause = Array.iter ~f:(index_literal cid) clause in
   array_iter_cid ~f:index_clause clauses;
-  neg, pos
+  let to_arrays = Array.map ~f:Array.of_list in
+  to_arrays neg, to_arrays pos
 ;;
 
 let create cnf =
   let clauses = typeful_clauses cnf in
-  let _, _ = index cnf clauses in
-  { clauses }
+  let negative, positive = index_all cnf clauses in
+  { clauses; negative; positive }
 ;;
