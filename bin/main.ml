@@ -3,6 +3,8 @@ open Stdio
 open Sat
 
 let show a = Util.show_array ~f:Int.to_string a
+let show_clause_ids = Util.show_array ~f:Clause_id.show
+let show_clause = Util.show_array ~f:Literal.show
 
 let show_cnf_summary cnf =
   printf "Number of variables: %d\n" (Cnf.num_variables cnf);
@@ -15,14 +17,23 @@ let show_cnf_summary cnf =
     (show (Cnf.clauses cnf).(last))
 ;;
 
+let run cnf =
+  show_cnf_summary cnf;
+  let database = Database.create cnf in
+  let nbvar = Cnf.num_variables cnf in
+  let i = Clause_id.of_int_check 45 in
+  print_endline "----------------------------";
+  print_endline @@ show_clause (Database.get_clause database i);
+  let x = Literal.of_int_check nbvar 58 in
+  print_endline @@ show_clause_ids (Database.relevant_clauses database x)
+;;
+
 let () =
   let args = Sys.get_argv () in
   let filename = args.(1) in
   match Dimacs.read_file filename with
   | Ok cnf ->
     Verify_input.verify cnf;
-    show_cnf_summary cnf
-    (* let db = Database.create cnf in *)
-    (* print_endline @@ show (Database.relevant_clauses db (Literal.of_int_check 58)) *)
+    run cnf
   | Error msg -> print_endline msg
 ;;

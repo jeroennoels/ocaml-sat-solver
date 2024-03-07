@@ -2,8 +2,8 @@ open! Base
 
 type t = int
 
-let of_int_check x =
-  assert (x >= 0);
+let of_int_check bound x =
+  assert (x > 0 && x <= bound);
   x
 ;;
 

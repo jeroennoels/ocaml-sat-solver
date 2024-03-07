@@ -1,16 +1,16 @@
 open! Base
 
-(* type literal = Literal.t *)
-(* type clause_id = Clause_id.t *)
-(* type clause = literal array *)
-type t = unit
-(* { negative : clause_id array array *)
-(* ; positive : clause_id array array *)
-(* ; clauses : clause array *)
-(* } *)
+type literal = Literal.t
+type clause = literal array
+type t = { clauses : clause array }
 
-let relevant_clauses _ _ = failwith "todo"
-(* if x > 0 then t.negative.(x) else t.positive.(-x) *)
+let get_clause t i = t.clauses.(Clause_id.to_int i)
+let relevant_clauses _ _ = Array.create ~len:1 (Clause_id.of_int_check 0)
 
-(* let create_clause_array _ = () *)
-let create _ = failwith "todo"
+let typeful_clauses cnf : clause array =
+  let nbvar = Cnf.num_variables cnf in
+  let typeful x = Literal.of_int_check nbvar x in
+  Array.map ~f:(Array.map ~f:typeful) (Cnf.clauses cnf)
+;;
+
+let create cnf = { clauses = typeful_clauses cnf }
