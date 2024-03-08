@@ -11,10 +11,10 @@ type t =
   ; negative : clause_id array array
   }
 
-let get_clause t i = t.clauses.((Clause_id.to_int [@Inlined]) i)
+let get_literals t i = t.clauses.((Clause_id.to_int [@Inlined]) i)
 
-let relevant_clauses t x =
-  let arr = if (Literal.is_positive [@Inlined]) x then t.negative else t.positive in
+let get_clause_ids t x =
+  let arr = if (Literal.is_positive [@Inlined]) x then t.positive else t.negative in
   let v = (Variable.of_literal [@Inlined]) x in
   arr.((Variable.to_int [@Inlined]) v)
 ;;

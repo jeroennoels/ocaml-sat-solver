@@ -34,31 +34,33 @@ let is_unboxed_int x =
 ;;
 
 let%test "unboxed literal" =
-  let clause = Database.get_clause database (clause_id 0) in
+  let cid = clause_id 0 in
+  let clause = Database.get_literals database cid in
   let x = clause.(0) in
-  Literal.to_int x = 2 && is_unboxed_int x
+  is_unboxed_int cid && Literal.to_int x = 2 && is_unboxed_int x
 ;;
 
 let%test "unboxed clause_id" =
-  let cids = Database.relevant_clauses database (sample_literal 6) in
+  let x = sample_literal (-6) in
+  let cids = Database.get_clause_ids database x in
   let cid = cids.(0) in
-  Clause_id.to_int cid = 6 && is_unboxed_int cid
+  is_unboxed_int x && Clause_id.to_int cid = 6 && is_unboxed_int cid
 ;;
 
 let%test "get clause" =
-  let clause = Database.get_clause database (clause_id 5) in
+  let clause = Database.get_literals database (clause_id 5) in
   equal_int_arrays [| 1; 2; -3; -4; 5 |] (Array.map ~f:Literal.to_int clause)
 ;;
 
 let%test "relevant clauses" =
   let run x =
     sample_literal x
-    |> Database.relevant_clauses database
+    |> Database.get_clause_ids database
     |> Array.map ~f:Clause_id.to_int
     |> int_array_sorted
   in
-  equal_int_arrays [| 0; 1; 3; 5 |] (run (-2))
-  && equal_int_arrays [| 2 |] (run 2)
-  && equal_int_arrays [| 0; 4; 5 |] (run 3)
-  && equal_int_arrays [| 2; 5 |] (run (-5))
+  equal_int_arrays [| 0; 1; 3; 5 |] (run 2)
+  && equal_int_arrays [| 2 |] (run (-2))
+  && equal_int_arrays [| 0; 4; 5 |] (run (-3))
+  && equal_int_arrays [| 2; 5 |] (run 5)
 ;;
