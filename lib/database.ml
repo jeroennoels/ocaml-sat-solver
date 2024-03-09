@@ -11,12 +11,12 @@ type t =
   ; negative : clause_id array array
   }
 
-let get_literals t i = t.clauses.((Clause_id.to_int [@Inlined]) i)
+let get_literals t i = t.clauses.(Clause_id.to_int i)
 
 let get_clause_ids t x =
-  let arr = if (Literal.is_positive [@Inlined]) x then t.positive else t.negative in
-  let v = (Variable.of_literal [@Inlined]) x in
-  arr.((Variable.to_int [@Inlined]) v)
+  let arr = if Literal.is_positive x then t.positive else t.negative in
+  let v = Variable.of_literal x in
+  arr.(Variable.to_int v)
 ;;
 
 let typeful_clauses cnf : clause array =
@@ -34,7 +34,7 @@ let push (arr : clause_id list array) (v : variable) (cid : clause_id) =
     Position [i = 0] is wasted to avoid the offset. *)
 
 let array_iter_cid ~f (arr : clause array) =
-  let f i elt = f ((Clause_id.of_int [@Inlined]) i) elt [@@inline] in
+  let f i elt = f (Clause_id.of_int i) elt [@@inline] in
   Array.iteri ~f arr
 ;;
 

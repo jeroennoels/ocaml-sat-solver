@@ -5,7 +5,7 @@ type option_bool =
   | False
   | True
 
-type t = int array
+type t = option_bool array
 
 let negate = function
   | True -> False
@@ -13,35 +13,30 @@ let negate = function
   | Undefined -> Undefined
 ;;
 
-let create ~nbvar = Array.create ~len:(nbvar + 1) 0
+let create ~nbvar : t = Array.create ~len:(nbvar + 1) Undefined
 
-let eval t x =
+let eval (t : t) x =
   let i = Literal.to_int x in
-  if i > 0
-  then (
-    match t.(i) with
-    | 1 -> True
-    | -1 -> False
-    | _ -> Undefined)
-  else (
-    match t.(-i) with
-    | -1 -> True
-    | 1 -> False
-    | _ -> Undefined)
+  if i > 0 then t.(i) else negate t.(-i)
 ;;
 
-let assign t v b =
-  assert (t.(Variable.to_int v) = 0);
-  t.(Variable.to_int v) <- (if b then 1 else -1)
+let is_undefined = function
+  | Undefined -> true
+  | _ -> false
 ;;
 
-let forget t v = t.(Variable.to_int v) <- 0
+let assign (t : t) v b =
+  assert (is_undefined t.(Variable.to_int v));
+  t.(Variable.to_int v) <- (if b then True else False)
+;;
+
+let forget (t : t) v = t.(Variable.to_int v) <- Undefined
 
 let show_entry i a =
   match a with
-  | 1 -> "(" ^ Int.to_string i ^ ":T)"
-  | -1 -> "(" ^ Int.to_string i ^ ":F)"
+  | True -> "(" ^ Int.to_string i ^ ":T)"
+  | False -> "(" ^ Int.to_string i ^ ":F)"
   | _ -> ""
 ;;
 
-let show t = Array.mapi ~f:show_entry t |> Array.to_list |> String.concat ~sep:""
+let show (t : t) = Array.mapi ~f:show_entry t |> Array.to_list |> String.concat ~sep:""
