@@ -36,6 +36,7 @@ let invariant (t : t) =
 ;;
 
 let step (t : t) (x, _) =
+  assert (t.length < num_variables t);
   assert (invariant t);
   let var = Variable.of_literal x in
   let pos = Literal.is_positive x in
@@ -72,11 +73,12 @@ let eval_literal (t : t) x =
 let decide _ = None
 let decision_level_exn _ _ = 0
 
-let unassigned (t : t) =
+let copy_unassigned (t : t) =
   let nbvar = num_variables t in
   let pos = t.length + 1 in
-  let len = nbvar - pos in
-  Array.map ~f:(Variable.of_int_check nbvar) (Array.sub t.steps_to_vars ~pos ~len)
+  let copy = Array.subo t.steps_to_vars ~pos in
+  Array.sort ~compare:Int.compare copy;
+  Array.map ~f:(Variable.of_int_check nbvar) copy
 ;;
 
 let show_entry (i : int) (a : option_bool) =

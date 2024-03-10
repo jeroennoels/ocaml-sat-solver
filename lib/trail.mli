@@ -18,5 +18,5 @@ val decision_level_exn : t -> Variable.t -> int
 (* for debugging and testing *)
 
 val show_assignment : t -> string
-val unassigned : t -> Variable.t array
+val copy_unassigned : t -> Variable.t array
 val invariant : t -> bool
