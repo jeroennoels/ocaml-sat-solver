@@ -7,14 +7,14 @@ let literals = Array.map ~f:literal
 
 let assignment v =
   match Variable.to_int v with
-  | 1 | 3 | 5 -> Assignment.True
-  | 2 | 4 | 6 -> Assignment.False
-  | _ -> Assignment.Undefined
+  | 1 | 3 | 5 -> Trail.True
+  | 2 | 4 | 6 -> Trail.False
+  | _ -> Trail.Undefined
 ;;
 
 let eval x =
   let value = assignment (Variable.of_literal x) in
-  if Literal.is_positive x then value else Assignment.negate value
+  if Literal.is_positive x then value else Trail.negate value
 ;;
 
 let shuffle a =

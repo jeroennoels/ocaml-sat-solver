@@ -7,6 +7,7 @@ type option_bool =
 
 type t
 
+val negate : option_bool -> option_bool
 val empty : nbvar:int -> t
 val decide : t -> Literal.t option
 val step : t -> Literal.t * Clause_id.t -> unit
