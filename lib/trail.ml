@@ -29,6 +29,7 @@ let empty ~nbvar =
 ;;
 
 let num_variables (t : t) = Array.length t.vars_to_steps - 1
+let is_complete (t : t) = t.length = num_variables t
 
 let invariant (t : t) =
   let f v s = t.steps_to_vars.(Int.abs s) = v in
@@ -103,3 +104,5 @@ let show_assignment (t : t) =
   let all_variables = List.range 1 ~stop:`inclusive nbvar in
   all_variables |> List.map ~f |> String.concat ~sep:""
 ;;
+
+let length (t : t) = t.length

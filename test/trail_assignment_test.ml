@@ -9,12 +9,12 @@ let print_assignment trail =
     (Util.show_array ~f:Variable.show (Trail.copy_unassigned trail))
 ;;
 
-let%expect_test "assign" =
+let%expect_test "walk" =
   let nbvar = 8 in
-  let cid = Clause_id.of_int 123 in
   let trail = Trail.empty ~nbvar in
   let step i b =
     let x = Literal.of_int_check nbvar (if b then i else -i) in
+    let cid = Clause_id.of_int 123 in
     Trail.step trail (x, cid)
   in
   let decide v b =
@@ -51,4 +51,39 @@ let%expect_test "assign" =
     A U1 2 3 4 5 6 7 8
     A(2:F)(5:T)(6:F) U1 3 4 7 8
     |}]
+;;
+
+let%test "walk randomly" =
+  let nbvar = 100 in
+  let trail = Trail.empty ~nbvar in
+  (* zero-indexed array *)
+  let last_assignment : bool array = Array.create ~len:nbvar false in
+  let is_compatible () =
+    let good i b =
+      let var = Variable.of_int_check nbvar (i + 1) in
+      match Trail.eval_variable trail var with
+      | True -> b
+      | False -> not b
+      | Undefined -> true
+    in
+    Array.for_alli ~f:good last_assignment
+  in
+  for loop = 1 to nbvar do
+    (* on every iteration, go one step further *)
+    while Trail.length trail < loop do
+      let var = Trail.random_unassigned_exn trail in
+      let decision = Random.bool () in
+      (* zero-indexed array *)
+      let i = Variable.to_int var - 1 in
+      last_assignment.(i) <- decision;
+      Trail.decide trail var decision
+    done;
+    assert (is_compatible ());
+    (* random backjump *)
+    let len = Trail.length trail in
+    let jump_to = Random.int_incl 0 len in
+    Trail.backjump trail ~length:jump_to;
+    assert (is_compatible ())
+  done;
+  is_compatible ()
 ;;

@@ -9,6 +9,7 @@ type t
 
 val negate : option_bool -> option_bool
 val empty : nbvar:int -> t
+val is_complete : t -> bool
 val decide : t -> Variable.t -> bool -> unit
 val step : t -> Literal.t * Clause_id.t -> unit
 val backjump : t -> length:int -> unit
@@ -21,3 +22,4 @@ val decision_level_exn : t -> Variable.t -> int
 val show_assignment : t -> string
 val copy_unassigned : t -> Variable.t array
 val invariant : t -> bool
+val length : t -> int
