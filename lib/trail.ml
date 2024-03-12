@@ -35,7 +35,7 @@ let invariant (t : t) =
   Array.for_alli ~f t.vars_to_steps
 ;;
 
-let step (t : t) (x, _) =
+let step_internal (t : t) x =
   assert (t.length < num_variables t);
   assert (invariant t);
   let var = Variable.of_literal x in
@@ -53,6 +53,8 @@ let step (t : t) (x, _) =
   t.vars_to_steps.(w) <- (if pos then j else -j)
 ;;
 
+let step t (x, _) = step_internal t x
+let decide (t : t) v b = step_internal t (Variable.to_literal v b)
 let backjump (t : t) ~length = t.length <- length
 
 let eval_variable (t : t) var =
@@ -70,7 +72,13 @@ let eval_literal (t : t) x =
   if Literal.is_positive x then value else negate value
 ;;
 
-let decide _ = None
+let random_unassigned_exn (t : t) =
+  let nbvar = num_variables t in
+  (* raises when bounds cross *)
+  let i = Random.int_incl (t.length + 1) nbvar in
+  Variable.of_int_check nbvar t.steps_to_vars.(i)
+;;
+
 let decision_level_exn _ _ = 0
 
 let copy_unassigned (t : t) =

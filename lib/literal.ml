@@ -2,6 +2,8 @@ open! Base
 
 type t = int
 
+let of_int_unchecked x = x
+
 let of_int_check bound x =
   assert (Int.abs x <= bound && not (x = 0));
   x
