@@ -9,8 +9,10 @@ type t =
   { clauses : clause array
   ; positive : clause_id array array
   ; negative : clause_id array array
+  ; nbvar : int
   }
 
+let num_variables t = t.nbvar
 let get_literals t i = t.clauses.(Clause_id.to_int i)
 
 let get_clause_ids t x =
@@ -57,5 +59,6 @@ let index_all cnf (clauses : clause array) =
 let create cnf =
   let clauses = typeful_clauses cnf in
   let negative, positive = index_all cnf clauses in
-  { clauses; negative; positive }
+  let nbvar = Cnf.num_variables cnf in
+  { clauses; negative; positive; nbvar }
 ;;

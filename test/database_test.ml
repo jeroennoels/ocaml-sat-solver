@@ -2,7 +2,7 @@ open! Base
 open! Stdio
 open Sat
 
-let sample_cnf =
+let make_database () =
   let clauses =
     [| [| 2; -3; 1 |]
      ; [| 6; 2 |]
@@ -15,16 +15,11 @@ let sample_cnf =
   in
   let cnf = Cnf.create 6 clauses in
   Verify_input.verify cnf;
-  cnf
+  Database.create cnf
 ;;
 
-let sample_literal x =
-  let nbvar = Cnf.num_variables sample_cnf in
-  Literal.of_int_check nbvar x
-;;
-
-let database = Database.create sample_cnf
-let clause_id = Clause_id.of_int
+let sample_literal x = Literal.of_int_check 6 x
+let clause_id i = Clause_id.of_int i
 let equal_int_arrays = Array.equal Int.equal
 let int_array_sorted = Array.sorted_copy ~compare:Int.compare
 
@@ -34,6 +29,7 @@ let is_unboxed_int x =
 ;;
 
 let%test "unboxed literal" =
+  let database = make_database () in
   let cid = clause_id 0 in
   let clause = Database.get_literals database cid in
   let x = clause.(0) in
@@ -41,20 +37,25 @@ let%test "unboxed literal" =
 ;;
 
 let%test "unboxed clause_id" =
-  let x = sample_literal (-6) in
+  let database = make_database () in
+  let nbvar = Database.num_variables database in
+  let x = Literal.of_int_check nbvar (-6) in
   let cids = Database.get_clause_ids database x in
   let cid = cids.(0) in
   is_unboxed_int x && Clause_id.to_int cid = 6 && is_unboxed_int cid
 ;;
 
 let%test "get clause" =
+  let database = make_database () in
   let clause = Database.get_literals database (clause_id 5) in
   equal_int_arrays [| 1; 2; -3; -4; 5 |] (Array.map ~f:Literal.to_int clause)
 ;;
 
 let%test "relevant clauses" =
+  let database = make_database () in
+  let nbvar = Database.num_variables database in
   let run x =
-    sample_literal x
+    Literal.of_int_check nbvar x
     |> Database.get_clause_ids database
     |> Array.map ~f:Clause_id.to_int
     |> int_array_sorted
