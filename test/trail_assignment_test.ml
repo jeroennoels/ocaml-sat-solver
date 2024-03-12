@@ -66,7 +66,7 @@ let%test "walk randomly" =
       | False -> not b
       | Undefined -> true
     in
-    Array.for_alli ~f:good last_assignment
+    Trail.invariant trail && Array.for_alli ~f:good last_assignment
   in
   for loop = 1 to nbvar do
     (* on every iteration, go one step further *)

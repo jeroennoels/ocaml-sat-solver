@@ -38,7 +38,6 @@ let invariant (t : t) =
 
 let step_internal (t : t) x =
   assert (t.length < num_variables t);
-  assert (invariant t);
   let var = Variable.of_literal x in
   let pos = Literal.is_positive x in
   let i = t.length + 1 in
