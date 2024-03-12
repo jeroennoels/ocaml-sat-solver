@@ -18,7 +18,7 @@ let make_database () =
   Database.create cnf
 ;;
 
-let sample_literal x = Literal.of_int_check 6 x
+let sample_literal x = Literal.of_int_check ~nbvar:6 x
 let clause_id i = Clause_id.of_int i
 let equal_int_arrays = Array.equal Int.equal
 let int_array_sorted = Array.sorted_copy ~compare:Int.compare
@@ -39,7 +39,7 @@ let%test "unboxed literal" =
 let%test "unboxed clause_id" =
   let database = make_database () in
   let nbvar = Database.num_variables database in
-  let x = Literal.of_int_check nbvar (-6) in
+  let x = Literal.of_int_check ~nbvar (-6) in
   let cids = Database.get_clause_ids database x in
   let cid = cids.(0) in
   is_unboxed_int x && Clause_id.to_int cid = 6 && is_unboxed_int cid
@@ -55,7 +55,7 @@ let%test "relevant clauses" =
   let database = make_database () in
   let nbvar = Database.num_variables database in
   let run x =
-    Literal.of_int_check nbvar x
+    Literal.of_int_check ~nbvar x
     |> Database.get_clause_ids database
     |> Array.map ~f:Clause_id.to_int
     |> int_array_sorted

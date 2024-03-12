@@ -23,7 +23,7 @@ let get_clause_ids t x =
 
 let typeful_clauses cnf : clause array =
   let nbvar = Cnf.num_variables cnf in
-  let typeful x = Literal.of_int_check nbvar x in
+  let typeful x = Literal.of_int_check ~nbvar x in
   Array.map ~f:(Array.map ~f:typeful) (Cnf.clauses cnf)
 ;;
 

@@ -2,7 +2,7 @@ open! Base
 open! Stdio
 open Sat
 
-let literal i = Literal.of_int_check 1000 i
+let literal i = Literal.of_int_check ~nbvar:1000 i
 let literals ints = Array.map ~f:literal ints
 
 let assignment v =

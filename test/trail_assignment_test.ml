@@ -13,12 +13,12 @@ let%expect_test "walk" =
   let nbvar = 8 in
   let trail = Trail.empty ~nbvar in
   let step i b =
-    let x = Literal.of_int_check nbvar (if b then i else -i) in
+    let x = Literal.of_int_check ~nbvar (if b then i else -i) in
     let cid = Clause_id.of_int 123 in
     Trail.step trail (x, cid)
   in
   let decide v b =
-    let var = Variable.of_int_check nbvar v in
+    let var = Variable.of_int_check ~nbvar v in
     Trail.decide trail var b
   in
   decide 4 true;
@@ -60,7 +60,7 @@ let%test "walk randomly" =
   let last_assignment : bool array = Array.create ~len:nbvar false in
   let is_compatible () =
     let good i b =
-      let var = Variable.of_int_check nbvar (i + 1) in
+      let var = Variable.of_int_check ~nbvar (i + 1) in
       match Trail.eval_variable trail var with
       | True -> b
       | False -> not b

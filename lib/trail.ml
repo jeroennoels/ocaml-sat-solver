@@ -76,7 +76,7 @@ let random_unassigned_exn (t : t) =
   let nbvar = num_variables t in
   (* raises when bounds cross *)
   let i = Random.int_incl (t.length + 1) nbvar in
-  Variable.of_int_check nbvar t.steps_to_vars.(i)
+  Variable.of_int_check ~nbvar t.steps_to_vars.(i)
 ;;
 
 let decision_level_exn _ _ = 0
@@ -86,7 +86,7 @@ let copy_unassigned (t : t) =
   let pos = t.length + 1 in
   let copy = Array.subo t.steps_to_vars ~pos in
   Array.sort ~compare:Int.compare copy;
-  Array.map ~f:(Variable.of_int_check nbvar) copy
+  Array.map ~f:(Variable.of_int_check ~nbvar) copy
 ;;
 
 let show_entry (i : int) (a : option_bool) =
@@ -98,7 +98,7 @@ let show_entry (i : int) (a : option_bool) =
 
 let show_assignment (t : t) =
   let nbvar = num_variables t in
-  let variable i = Variable.of_int_check nbvar i in
+  let variable i = Variable.of_int_check ~nbvar i in
   let f i = show_entry i (eval_variable t (variable i)) in
   let all_variables = List.range 1 ~stop:`inclusive nbvar in
   all_variables |> List.map ~f |> String.concat ~sep:""

@@ -24,7 +24,7 @@ let run cnf =
   let i = Clause_id.of_int 45 in
   print_endline "----------------------------";
   print_endline @@ show_clause (Database.get_literals database i);
-  let x = Literal.of_int_check nbvar 58 in
+  let x = Literal.of_int_check ~nbvar 58 in
   print_endline @@ show_clause_ids (Database.get_clause_ids database x)
 ;;
 
