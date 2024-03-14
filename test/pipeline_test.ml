@@ -34,8 +34,31 @@ let%expect_test "dequeue" =
   [%expect {| (2)(-6)(3)(-5)(8)EMPTY |}]
 ;;
 
-let%test "pipeline" =
+let%expect_test "duplicates" =
   let pipeline = Pipeline.empty () in
-  enqueue_no_conflict pipeline [ 5; 2; -3 ];
-  Option.is_none (enqueue pipeline [ 7; 6 ])
+  enqueue_no_conflict pipeline [ 2; 6; 7; 2 ];
+  enqueue_no_conflict pipeline [ 3; -5; 7; 7 ];
+  enqueue_no_conflict pipeline [ 2; 6; -1 ];
+  for _ = 1 to 7 do
+    print_dequeue pipeline
+  done;
+  enqueue_no_conflict pipeline [ 3; 7; -5; 7 ];
+  for _ = 1 to 4 do
+    print_dequeue pipeline
+  done;
+  [%expect {|
+    (2)(6)(7)(3)(-5)(-1)EMPTY
+    (3)(7)(-5)EMPTY
+    |}]
+;;
+
+let%expect_test "conflict" =
+  let pipeline = Pipeline.empty () in
+  enqueue_no_conflict pipeline [ 2; 6; 7; 2 ];
+  enqueue_no_conflict pipeline [ -3; 6; -4; 2 ];
+  let conflict = enqueue pipeline [ 1; 2; 4; 6 ] in
+  (match conflict with
+   | Some ((x, _), (y, _)) -> printf "(%d)(%d)" (Literal.to_int x) (Literal.to_int y)
+   | _ -> printf "no-conflict");
+  [%expect {| (4)(-4) |}]
 ;;

@@ -5,4 +5,4 @@ type t
 
 val empty : unit -> t
 val dequeue : t -> antecedent option
-val enqueue_all : t -> antecedent list -> antecedent option
+val enqueue_all : t -> antecedent list -> (antecedent * antecedent) option

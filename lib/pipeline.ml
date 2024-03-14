@@ -26,13 +26,18 @@ let find (t : t) (a : antecedent) : detect =
   | Some b -> if same_literal a b then Duplicate else Conflict (a, b)
 ;;
 
+exception Abort of (antecedent * antecedent)
+
 let enqueue_all (t : t) units =
   let f a =
     match find t a with
     | New -> Queue.enqueue t.queue a
     | Duplicate -> ()
-    | Conflict _ -> failwith "conflict"
+    | Conflict c -> raise (Abort c)
   in
-  List.iter ~f units;
-  None
+  try
+    List.iter ~f units;
+    None
+  with
+  | Abort conflict -> Some conflict
 ;;
