@@ -53,12 +53,13 @@ let%expect_test "walk" =
     |}]
 ;;
 
-let%test "walk randomly" =
+let%test_unit "walk randomly" =
   let nbvar = 100 in
   let trail = Trail.empty ~nbvar in
   (* zero-indexed array *)
   let last_assignment : bool array = Array.create ~len:nbvar false in
-  let is_compatible () =
+  let check_trail () =
+    if not (Trail.invariant trail) then failwith "trail invariant violation";
     let good i b =
       let var = Variable.of_int_check ~nbvar (i + 1) in
       match Trail.eval_variable trail var with
@@ -66,7 +67,8 @@ let%test "walk randomly" =
       | False -> not b
       | Undefined -> true
     in
-    Trail.invariant trail && Array.for_alli ~f:good last_assignment
+    if not (Array.for_alli ~f:good last_assignment)
+    then failwith "unexpected trail assignment"
   in
   for loop = 1 to nbvar do
     (* on every iteration, go one step further *)
@@ -78,12 +80,12 @@ let%test "walk randomly" =
       last_assignment.(i) <- decision;
       Trail.decide trail var decision
     done;
-    assert (is_compatible ());
+    check_trail ();
     (* random backjump *)
     let len = Trail.length trail in
     let jump_to = Random.int_incl 0 len in
     Trail.backjump trail ~length:jump_to;
-    assert (is_compatible ())
+    check_trail ()
   done;
-  is_compatible ()
+  check_trail ()
 ;;
