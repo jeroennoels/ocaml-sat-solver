@@ -15,6 +15,7 @@ type t =
   { steps_to_vars : int array
   ; vars_to_steps : int array
   ; mutable length : int
+  ; mutable decision_level : int
   }
 
 let empty ~nbvar =
@@ -25,7 +26,7 @@ let empty ~nbvar =
     steps_to_vars.(i) <- i;
     vars_to_steps.(i) <- i
   done;
-  { steps_to_vars; vars_to_steps; length = 0 }
+  { steps_to_vars; vars_to_steps; length = 0; decision_level = 0 }
 ;;
 
 let num_variables (t : t) = Array.length t.vars_to_steps - 1
@@ -54,7 +55,12 @@ let step_internal (t : t) x =
 ;;
 
 let step t (x, _) = step_internal t x
-let decide (t : t) v b = step_internal t (Variable.to_literal v b)
+
+let decide (t : t) v b =
+  step_internal t (Variable.to_literal v b);
+  t.decision_level <- t.decision_level + 1
+;;
+
 let backjump (t : t) ~length = t.length <- length
 
 let eval_variable (t : t) var =
