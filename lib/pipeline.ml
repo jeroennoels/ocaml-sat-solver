@@ -12,6 +12,7 @@ let create () =
   { queue }
 ;;
 
+let clear (t : t) = Queue.clear t.queue
 let is_empty (t : t) = Queue.is_empty t.queue
 let dequeue (t : t) = Queue.dequeue t.queue
 
