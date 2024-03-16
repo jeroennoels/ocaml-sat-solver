@@ -73,15 +73,13 @@ let%expect_test "find units" =
   [%expect {| (8, 0) (9, 1) (8, 4) |}]
 ;;
 
-let%test "propagate" =
+let%expect_test "propagate" =
   let cnf = Result.ok_or_failwith (Dimacs.read_lines Examples.factoring) in
-  let database = Database.create cnf in
+  let database, trail, pipeline = Driver.initialize cnf in
   let nbvar = Database.num_variables database in
-  let trail = Trail.create ~nbvar in
-  let pipeline = Pipeline.create () in
   let var = Variable.of_int_check ~nbvar 15 in
   let x = Trail.decide trail var false in
-  let _ = Propagation.propagate database trail pipeline x in
+  ignore @@ Propagation.propagate database trail pipeline x;
   print_endline (Trail.show_assignment trail);
-  true
+  [%expect {| (15:F)(113:F)(115:F)(117:F) |}]
 ;;
