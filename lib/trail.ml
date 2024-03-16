@@ -18,7 +18,7 @@ type t =
   ; mutable decision_level : int
   }
 
-let empty ~nbvar =
+let create ~nbvar =
   let len = nbvar + 1 in
   let steps_to_vars = Array.create ~len 0 in
   let vars_to_steps = Array.create ~len 0 in

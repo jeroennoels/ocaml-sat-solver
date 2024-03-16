@@ -11,7 +11,7 @@ let print_assignment trail =
 
 let%expect_test "walk" =
   let nbvar = 8 in
-  let trail = Trail.empty ~nbvar in
+  let trail = Trail.create ~nbvar in
   let step i b =
     let x = Literal.of_int_check ~nbvar (if b then i else -i) in
     let cid = Clause_id.of_int 123 in
@@ -55,7 +55,7 @@ let%expect_test "walk" =
 
 let%test_unit "walk randomly" =
   let nbvar = 100 in
-  let trail = Trail.empty ~nbvar in
+  let trail = Trail.create ~nbvar in
   (* zero-indexed array *)
   let last_assignment : bool array = Array.create ~len:nbvar false in
   let check_trail () =

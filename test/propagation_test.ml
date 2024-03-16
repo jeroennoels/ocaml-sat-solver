@@ -72,3 +72,16 @@ let%expect_test "find units" =
   print_endline @@ String.concat ~sep:" " (List.map ~f:show_unit units);
   [%expect {| (8, 0) (9, 1) (8, 4) |}]
 ;;
+
+let%test "propagate" =
+  let cnf = Result.ok_or_failwith (Dimacs.read_lines Examples.factoring) in
+  let database = Database.create cnf in
+  let nbvar = Database.num_variables database in
+  let trail = Trail.create ~nbvar in
+  let pipeline = Pipeline.create () in
+  let _ =
+    Propagation.propagate database trail pipeline (Literal.of_int_check ~nbvar 15)
+  in
+  print_endline @@ Int.to_string (Database.num_variables database);
+  true
+;;
