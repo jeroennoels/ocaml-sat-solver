@@ -34,4 +34,20 @@ let find_units database (eval : literal -> option_bool) (x : literal)
   Array.fold ~init:[] ~f relevant_clauses
 ;;
 
-let propagate _ _ _ _ = None
+let propagate database trail pipeline kickoff =
+  (* recycle allocated space *)
+  assert (Pipeline.is_empty pipeline);
+  assert (Trail.is_assigned trail kickoff);
+  let rec go x =
+    let units = find_units database (Trail.eval_literal trail) x in
+    match Pipeline.enqueue_all pipeline units with
+    | None ->
+      (match Pipeline.dequeue pipeline with
+       | Some ((y, _) as antecedent) ->
+         Trail.step trail antecedent;
+         go y
+       | None -> None)
+    | conflict -> conflict
+  in
+  go kickoff
+;;

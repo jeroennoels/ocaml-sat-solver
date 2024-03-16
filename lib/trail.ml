@@ -57,8 +57,10 @@ let step_internal (t : t) x =
 let step t (x, _) = step_internal t x
 
 let decide (t : t) v b =
-  step_internal t (Variable.to_literal v b);
-  t.decision_level <- t.decision_level + 1
+  let x = Variable.to_literal v b in
+  step_internal t x;
+  t.decision_level <- t.decision_level + 1;
+  x
 ;;
 
 let backjump (t : t) ~length = t.length <- length
@@ -76,6 +78,12 @@ let eval_variable (t : t) var =
 let eval_literal (t : t) x =
   let value = eval_variable t (Variable.of_literal x) in
   if Literal.is_positive x then value else negate value
+;;
+
+let is_assigned (t : t) x =
+  match eval_literal t x with
+  | Undefined -> false
+  | _ -> true
 ;;
 
 let random_unassigned_exn (t : t) =

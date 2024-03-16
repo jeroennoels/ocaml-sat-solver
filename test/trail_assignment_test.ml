@@ -19,7 +19,7 @@ let%expect_test "walk" =
   in
   let decide v b =
     let var = Variable.of_int_check ~nbvar v in
-    Trail.decide trail var b
+    ignore @@ Trail.decide trail var b
   in
   decide 4 true;
   step 1 false;
@@ -78,7 +78,7 @@ let%test_unit "walk randomly" =
       (* zero-indexed array *)
       let i = Variable.to_int var - 1 in
       last_assignment.(i) <- decision;
-      Trail.decide trail var decision
+      ignore @@ Trail.decide trail var decision
     done;
     check_trail ();
     (* random backjump *)

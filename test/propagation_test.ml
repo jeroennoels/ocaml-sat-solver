@@ -79,9 +79,9 @@ let%test "propagate" =
   let nbvar = Database.num_variables database in
   let trail = Trail.create ~nbvar in
   let pipeline = Pipeline.create () in
-  let _ =
-    Propagation.propagate database trail pipeline (Literal.of_int_check ~nbvar 15)
-  in
-  print_endline @@ Int.to_string (Database.num_variables database);
+  let var = Variable.of_int_check ~nbvar 15 in
+  let x = Trail.decide trail var false in
+  let _ = Propagation.propagate database trail pipeline x in
+  print_endline (Trail.show_assignment trail);
   true
 ;;
