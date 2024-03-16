@@ -33,3 +33,5 @@ let find_units database (eval : literal -> option_bool) (x : literal)
   in
   Array.fold ~init:[] ~f relevant_clauses
 ;;
+
+let propagate _ _ _ _ = None

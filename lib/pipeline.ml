@@ -17,7 +17,7 @@ let dequeue (t : t) = Queue.dequeue t.queue
 type detect =
   | New
   | Duplicate
-  | Conflict of (antecedent * antecedent)
+  | Conflict of Conflict.t
 
 let same_literal (x, _) (y, _) = Literal.equal x y [@@inline]
 let same_variable (x, _) (y, _) = Literal.same_variable x y [@@inline]
@@ -31,7 +31,7 @@ let find (t : t) (a : antecedent) : detect =
 ;;
 
 (** to short-circuit when a conflict is detected *)
-exception Short of (antecedent * antecedent)
+exception Short of Conflict.t
 
 let enqueue_all (t : t) units =
   let f a =
