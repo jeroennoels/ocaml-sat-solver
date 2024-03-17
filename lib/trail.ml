@@ -125,3 +125,11 @@ let show_assignment (t : t) =
 
 let length (t : t) = t.length
 let set_logging (t : t) b = t.log <- b
+
+let eval_literal_nodeps (t : t) i =
+  let x = Literal.of_int_unchecked i in
+  match eval_literal t x with
+  | True -> Some true
+  | False -> Some false
+  | Undefined -> None
+;;

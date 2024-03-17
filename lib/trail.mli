@@ -19,9 +19,10 @@ val is_assigned : t -> Literal.t -> bool
 val random_unassigned_exn : t -> Variable.t
 val decision_level_exn : t -> Variable.t -> int
 
-(* only for debugging and testing *)
+(* only for debugging, logging and testing *)
 val show_assignment : t -> string
 val copy_unassigned : t -> Variable.t array
 val invariant : t -> bool
 val length : t -> int
 val set_logging : t -> bool -> unit
+val eval_literal_nodeps : t -> int -> bool option

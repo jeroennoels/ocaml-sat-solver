@@ -26,10 +26,12 @@ let run cnf =
   Pipeline.set_logging pipeline false;
   print_endline (Trail.show_assignment trail);
   print_endline
-  @@
-  match conflict with
-  | None -> "SAT"
-  | Some conflict -> Conflict.show conflict
+    (match conflict with
+     | None -> "SAT"
+     | Some conflict -> Conflict.show conflict);
+  print_endline "----------------------------";
+  let counters = Cnf.evaluate cnf (Trail.eval_literal_nodeps trail) in
+  print_endline (Cnf.show_counters counters)
 ;;
 
 let () =
