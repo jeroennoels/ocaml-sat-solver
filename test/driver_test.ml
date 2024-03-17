@@ -11,6 +11,8 @@ let%test "driver" =
   Trail.set_logging trail false;
   Pipeline.set_logging pipeline false;
   print_endline (Trail.show_assignment trail);
+  let counters = Cnf.evaluate cnf (Trail.eval_literal_nodeps trail) in
+  print_endline (Cnf.show_counters counters);
   if Option.is_some conflict then print_endline "conflict";
   true
 ;;
