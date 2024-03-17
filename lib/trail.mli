@@ -24,3 +24,4 @@ val show_assignment : t -> string
 val copy_unassigned : t -> Variable.t array
 val invariant : t -> bool
 val length : t -> int
+val set_logging : t -> bool -> unit

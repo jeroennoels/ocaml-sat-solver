@@ -16,6 +16,7 @@ type t =
   ; vars_to_steps : int array
   ; mutable length : int
   ; mutable decision_level : int
+  ; mutable log : bool
   }
 
 let create ~nbvar =
@@ -26,7 +27,7 @@ let create ~nbvar =
     steps_to_vars.(i) <- i;
     vars_to_steps.(i) <- i
   done;
-  { steps_to_vars; vars_to_steps; length = 0; decision_level = 0 }
+  { steps_to_vars; vars_to_steps; length = 0; decision_level = 0; log = false }
 ;;
 
 let num_variables (t : t) = Array.length t.vars_to_steps - 1
@@ -54,10 +55,14 @@ let step_internal (t : t) x =
   t.vars_to_steps.(w) <- (if pos then j else -j)
 ;;
 
-let step t (x, _) = step_internal t x
+let step t (x, _) =
+  if t.log then Stdio.printf "%d " (Literal.to_int x);
+  step_internal t x
+;;
 
 let decide (t : t) v b =
   let x = Variable.to_literal v b in
+  if t.log then Stdio.printf "[%d] " (Literal.to_int x);
   step_internal t x;
   t.decision_level <- t.decision_level + 1;
   x
@@ -119,3 +124,4 @@ let show_assignment (t : t) =
 ;;
 
 let length (t : t) = t.length
+let set_logging (t : t) b = t.log <- b

@@ -3,8 +3,6 @@ open Stdio
 open Sat
 
 let show a = Util.show_array ~f:Int.to_string a
-let show_clause_ids = Util.show_array ~f:Clause_id.show
-let show_clause = Util.show_array ~f:Literal.show
 
 let show_cnf_summary cnf =
   printf "Number of variables: %d\n" (Cnf.num_variables cnf);
@@ -19,13 +17,19 @@ let show_cnf_summary cnf =
 
 let run cnf =
   show_cnf_summary cnf;
-  let database = Database.create cnf in
-  let nbvar = Cnf.num_variables cnf in
-  let i = Clause_id.of_int 45 in
   print_endline "----------------------------";
-  print_endline @@ show_clause (Database.get_literals database i);
-  let x = Literal.of_int_check ~nbvar 58 in
-  print_endline @@ show_clause_ids (Database.get_clause_ids database x)
+  let database, trail, pipeline = Driver.initialize cnf in
+  Trail.set_logging trail true;
+  Pipeline.set_logging pipeline false;
+  let conflict = Driver.run database trail pipeline in
+  Trail.set_logging trail false;
+  Pipeline.set_logging pipeline false;
+  print_endline (Trail.show_assignment trail);
+  print_endline
+  @@
+  match conflict with
+  | None -> "SAT"
+  | Some conflict -> Conflict.show conflict
 ;;
 
 let () =

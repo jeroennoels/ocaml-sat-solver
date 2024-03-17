@@ -5,16 +5,27 @@ type antecedent = Literal.t * Clause_id.t
 (* We shall probably extend this record type with an additional
    data structure to make variable lookup more efficient. *)
 
-type t = { queue : antecedent Queue.t }
+type t =
+  { queue : antecedent Queue.t
+  ; mutable log : bool
+  }
 
 let create () =
   let queue = Queue.create () in
-  { queue }
+  { queue; log = false }
 ;;
 
+let bar n = String.init n ~f:(Fn.const '#')
+let set_logging (t : t) b = t.log <- b
+let length (t : t) = Queue.length t.queue
+let print_bar (t : t) = Stdio.print_endline (bar (length t))
 let clear (t : t) = Queue.clear t.queue
 let is_empty (t : t) = Queue.is_empty t.queue
-let dequeue (t : t) = Queue.dequeue t.queue
+
+let dequeue (t : t) =
+  if t.log then print_bar t;
+  Queue.dequeue t.queue
+;;
 
 type detect =
   | New
@@ -36,6 +47,7 @@ let find (t : t) (a : antecedent) : detect =
 exception Short of Conflict.t
 
 let enqueue_all (t : t) units =
+  if t.log then print_bar t;
   let f a =
     match find t a with
     | New -> Queue.enqueue t.queue a
