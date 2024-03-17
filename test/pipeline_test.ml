@@ -58,7 +58,7 @@ let%expect_test "conflict" =
   enqueue_no_conflict pipeline [ -3; 6; -4; 2 ];
   let conflict = enqueue pipeline [ 1; 2; 4; 6; -7 ] in
   (match conflict with
-   | Some ((x, _), (y, _)) -> printf "(%d)(%d)" (Literal.to_int x) (Literal.to_int y)
+   | Some (x, _) -> printf "CONLFICT(%s)" (Literal.show x)
    | _ -> printf "no-conflict");
-  [%expect {| (4)(-4) |}]
+  [%expect {| CONLFICT(-4) |}]
 ;;

@@ -40,7 +40,7 @@ let same_variable (x, _) (y, _) = Literal.same_variable x y [@@inline]
 let find (t : t) (a : antecedent) : detect =
   match Queue.find t.queue ~f:(same_variable a) with
   | None -> New
-  | Some b -> if same_literal a b then Duplicate else Conflict (a, b)
+  | Some b -> if same_literal a b then Duplicate else Conflict b
 ;;
 
 (** to short-circuit when a conflict is detected *)

@@ -47,8 +47,8 @@ let propagate database trail pipeline kickoff =
          Trail.step trail antecedent;
          go y
        | None -> None)
-    | Some (_, b) as conflict ->
-      Trail.step trail b;
+    | Some a as conflict ->
+      Trail.step trail a;
       Pipeline.clear pipeline;
       conflict
   in
