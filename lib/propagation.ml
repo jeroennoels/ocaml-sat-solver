@@ -47,10 +47,9 @@ let propagate database trail pipeline kickoff =
          Trail.step trail antecedent;
          go y
        | None -> None)
-    | Some conflict as some_conflict ->
-      Trail.step trail (Conflict.get_step conflict);
+    | conflict ->
       Pipeline.clear pipeline;
-      some_conflict
+      conflict
   in
   go kickoff
 ;;
