@@ -7,6 +7,7 @@ let of_int_check ~nbvar x =
   x
 ;;
 
+let of_int_unchecked x = x [@@inline]
 let to_int x = x [@@inline]
 let of_literal x = Int.abs (Literal.to_int x)
 

@@ -14,5 +14,8 @@ let%test "driver" =
   let eval = Trail.eval_literal_nodeps trail in
   let counters = Cnf.evaluate cnf eval in
   print_endline (Cnf.show_counters counters);
+  Trail.iter_down_until_last_decision trail ~f:(fun var ->
+    printf "{%s}" (Variable.show var));
+  print_endline "";
   Cnf.num_conflicting counters = 0
 ;;

@@ -3,6 +3,7 @@ open! Base
 type t
 
 val of_int_check : nbvar:int -> int -> t
+val of_int_unchecked : int -> t
 val to_int : t -> int
 val of_literal : Literal.t -> t
 val to_literal : t -> bool -> Literal.t

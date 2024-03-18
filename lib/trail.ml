@@ -11,11 +11,13 @@ let negate = function
   | Undefined -> Undefined
 ;;
 
+(* all our arrays below waste index zero to avoid offsetting *)
+
 type t =
   { steps_to_vars : int array
   ; vars_to_steps : int array
   ; mutable length : int
-  ; mutable decision_level : int
+  ; mutable last_decision_step : int option (* option until we handle backjumps *)
   ; mutable log : bool
   }
 
@@ -27,7 +29,7 @@ let create ~nbvar =
     steps_to_vars.(i) <- i;
     vars_to_steps.(i) <- i
   done;
-  { steps_to_vars; vars_to_steps; length = 0; decision_level = 0; log = false }
+  { steps_to_vars; vars_to_steps; length = 0; last_decision_step = None; log = false }
 ;;
 
 let num_variables (t : t) = Array.length t.vars_to_steps - 1
@@ -64,11 +66,14 @@ let decide (t : t) v b =
   let x = Variable.to_literal v b in
   if t.log then Stdio.printf "[%d] " (Literal.to_int x);
   step_internal t x;
-  t.decision_level <- t.decision_level + 1;
+  t.last_decision_step <- Some t.length;
   x
 ;;
 
-let backjump (t : t) ~length = t.length <- length
+let backjump (t : t) ~length =
+  t.length <- length;
+  t.last_decision_step <- None
+;;
 
 let eval_variable (t : t) var =
   let v = Variable.to_int var in
@@ -98,7 +103,20 @@ let random_unassigned_exn (t : t) =
   Variable.of_int_check ~nbvar t.steps_to_vars.(i)
 ;;
 
-let decision_level_exn _ _ = 0
+let iter_down_until_last_decision (t : t) ~f =
+  match t.last_decision_step with
+  | None -> failwith "last decision is undefined"
+  | Some decision_step ->
+    assert (t.length >= decision_step);
+    let rec go i =
+      if i > decision_step
+      then (
+        let var = Variable.of_int_unchecked t.steps_to_vars.(i) in
+        f var;
+        go (i - 1))
+    in
+    go t.length
+;;
 
 let copy_unassigned (t : t) =
   let nbvar = num_variables t in
