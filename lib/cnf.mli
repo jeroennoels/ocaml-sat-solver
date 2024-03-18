@@ -6,6 +6,7 @@ val create : int -> int array array -> t
 val num_variables : t -> int
 val num_clauses : t -> int
 val clauses : t -> int array array
+val conflicting : (int -> bool option) -> int array -> bool
 
 type counters
 
