@@ -60,5 +60,5 @@ let%expect_test "conflict" =
   (match conflict with
    | Some conflict -> print_endline (Conflict.show conflict)
    | _ -> printf "no-conflict");
-  [%expect {| [step=(-4,123);kappa=123] |}]
+  [%expect {| [Conflict(var=4)(123)(123)] |}]
 ;;

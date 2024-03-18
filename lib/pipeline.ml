@@ -38,16 +38,11 @@ let same_variable (x, _) (y, _) = Literal.same_variable x y [@@inline]
 (* the following approach will be inefficient when the queue is large *)
 
 let find (t : t) (a : antecedent) : detect =
-  (* time to optimize *)
+  (* time to optimize! *)
   assert (length t < 100);
   match Queue.find t.queue ~f:(same_variable a) with
   | None -> New
-  | Some b ->
-    if same_literal a b
-    then Duplicate
-    else (
-      let _, kappa = a in
-      Conflict (Conflict.create b kappa))
+  | Some b -> if same_literal a b then Duplicate else Conflict (Conflict.create b a)
 ;;
 
 (** to short-circuit when a conflict is detected *)
