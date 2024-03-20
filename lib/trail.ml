@@ -16,6 +16,7 @@ let negate = function
 type t =
   { step_to_var : int array
   ; var_to_step : int array
+  ; step_to_clause_id : int array (* only a part of this array will be relevant *)
   ; mutable length : int
   ; mutable last_decision_step : int option (* option until we handle backjumps *)
   ; mutable log : bool
@@ -25,11 +26,18 @@ let create ~nbvar =
   let len = nbvar + 1 in
   let step_to_var = Array.create ~len 0 in
   let var_to_step = Array.create ~len 0 in
+  let step_to_clause_id = Array.create ~len Clause_id.invalid_as_int in
   for i = 1 to nbvar do
     step_to_var.(i) <- i;
     var_to_step.(i) <- i
   done;
-  { step_to_var; var_to_step; length = 0; last_decision_step = None; log = false }
+  { step_to_var
+  ; var_to_step
+  ; step_to_clause_id
+  ; length = 0
+  ; last_decision_step = None
+  ; log = false
+  }
 ;;
 
 let num_variables (t : t) = Array.length t.var_to_step - 1
@@ -40,7 +48,7 @@ let invariant (t : t) =
   Array.for_alli ~f t.var_to_step
 ;;
 
-let step_internal (t : t) x =
+let step_internal (t : t) (x : Literal.t) : unit =
   assert (t.length < num_variables t);
   let var = Variable.of_literal x in
   let pos = Literal.is_positive x in
@@ -57,9 +65,10 @@ let step_internal (t : t) x =
   t.var_to_step.(w) <- (if pos then j else -j)
 ;;
 
-let step t (x, _) =
+let step (t : t) (x, cid) : unit =
   if t.log then Stdio.printf "%d " (Literal.to_int x);
-  step_internal t x
+  step_internal t x;
+  t.step_to_clause_id.(t.length) <- Clause_id.to_int cid
 ;;
 
 let decide (t : t) v b =
@@ -67,6 +76,7 @@ let decide (t : t) v b =
   if t.log then Stdio.printf "[%d] " (Literal.to_int x);
   step_internal t x;
   t.last_decision_step <- Some t.length;
+  t.step_to_clause_id.(t.length) <- Clause_id.invalid_as_int;
   x
 ;;
 
@@ -103,6 +113,12 @@ let random_unassigned_exn (t : t) =
   Variable.of_int_check ~nbvar t.step_to_var.(i)
 ;;
 
+let distance_to_last_decision (t : t) =
+  match t.last_decision_step with
+  | None -> failwith "last decision is undefined"
+  | Some decision_step -> t.length - decision_step
+;;
+
 let iter_down_until_last_decision (t : t) ~f =
   match t.last_decision_step with
   | None -> failwith "last decision is undefined"
@@ -112,7 +128,8 @@ let iter_down_until_last_decision (t : t) ~f =
       if i > decision_step
       then (
         let var = Variable.of_int_unchecked t.step_to_var.(i) in
-        f var;
+        let cid = Clause_id.of_int t.step_to_clause_id.(i) in
+        f var cid;
         go (i - 1))
     in
     go t.length

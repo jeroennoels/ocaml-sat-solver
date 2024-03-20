@@ -21,3 +21,12 @@ let run database trail pipeline =
   in
   go ()
 ;;
+
+let analyze database trail result =
+  match result with
+  | None -> Stdio.print_endline "SAT"
+  | Some conflict ->
+    let todo = Analysis.analyze_conflict database trail conflict in
+    ignore todo;
+    Stdio.print_endline (Conflict.show conflict)
+;;

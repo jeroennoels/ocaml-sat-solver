@@ -17,7 +17,8 @@ val eval_variable : t -> Variable.t -> option_bool
 val eval_literal : t -> Literal.t -> option_bool
 val is_assigned : t -> Literal.t -> bool
 val random_unassigned_exn : t -> Variable.t
-val iter_down_until_last_decision : t -> f:(Variable.t -> unit) -> unit
+val distance_to_last_decision : t -> int
+val iter_down_until_last_decision : t -> f:(Variable.t -> Clause_id.t -> unit) -> unit
 
 (* only for debugging, logging and testing *)
 

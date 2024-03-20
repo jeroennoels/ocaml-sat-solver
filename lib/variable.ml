@@ -8,6 +8,7 @@ let of_int_check ~nbvar x =
 ;;
 
 let of_int_unchecked x = x [@@inline]
+let equal x y = x = y [@@inline]
 let to_int x = x [@@inline]
 let of_literal x = Int.abs (Literal.to_int x)
 
