@@ -80,6 +80,8 @@ let decide (t : t) v b =
   x
 ;;
 
+let get_step (t : t) var = Int.abs t.var_to_step.(Variable.to_int var)
+
 let backjump (t : t) ~length =
   t.length <- length;
   t.last_decision_step <- None
@@ -113,26 +115,30 @@ let random_unassigned_exn (t : t) =
   Variable.of_int_check ~nbvar t.step_to_var.(i)
 ;;
 
-let distance_to_last_decision (t : t) =
+let get_last_decision_step_exn (t : t) : int =
   match t.last_decision_step with
   | None -> failwith "last decision is undefined"
-  | Some decision_step -> t.length - decision_step
+  | Some decision_step -> decision_step
 ;;
 
 let iter_down_until_last_decision (t : t) ~f =
-  match t.last_decision_step with
-  | None -> failwith "last decision is undefined"
-  | Some decision_step ->
-    assert (t.length >= decision_step);
-    let rec go i =
-      if i > decision_step
-      then (
-        let var = Variable.of_int_unchecked t.step_to_var.(i) in
-        let cid = Clause_id.of_int t.step_to_clause_id.(i) in
-        f var cid;
-        go (i - 1))
-    in
-    go t.length
+  let decision_step = get_last_decision_step_exn t in
+  assert (t.length >= decision_step);
+  let rec go i =
+    if i > decision_step
+    then (
+      let var = Variable.of_int_unchecked t.step_to_var.(i) in
+      let cid = Clause_id.of_int t.step_to_clause_id.(i) in
+      f var cid;
+      go (i - 1))
+  in
+  go t.length
+;;
+
+let last_step_exn (t : t) =
+  if t.length > 0
+  then Variable.of_int_unchecked t.step_to_var.(t.length)
+  else invalid_arg "empty trail"
 ;;
 
 let copy_unassigned (t : t) =
