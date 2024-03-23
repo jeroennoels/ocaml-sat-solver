@@ -5,12 +5,26 @@ type t =
   ; trail : Trail.t
   ; conflict_variable : Variable.t
   ; conflict_antecendent_dirty : Literal.t array
-      (* may contain duplicates, and contains both a conflict literal and its negation *)
+      (* dirty: may contain duplicates and includes the conflict pair *)
   ; conflict_step : int
   ; decision_step : int
   ; num_steps : int (* between last decision and conflict *)
   ; flow : int array
+  ; mutable learned_clause : (int, Int.comparator_witness) Set.t
   }
+
+let get_conflict_variable (t : t) = t.conflict_variable
+
+let print (t : t) =
+  Stdio.printf
+    "conflict_variable = %s\nnum_steps = %d\n"
+    (Variable.show t.conflict_variable)
+    t.num_steps
+;;
+
+let add_to_learned_clause (t : t) (x : Literal.t) =
+  t.learned_clause <- Set.add t.learned_clause (Literal.to_int x)
+;;
 
 let trail_ends_at_conflict (t : t) : bool =
   let var = Trail.last_step_variable_exn t.trail in
@@ -23,6 +37,20 @@ let index (t : t) (var : Variable.t) : int option =
   let step = Trail.get_step t.trail var in
   let i = t.conflict_step - step in
   if i < t.num_steps then Some i else None
+;;
+
+let partition (t : t) implied_var (xs : Literal.t array) : int list =
+  let (parents : int list ref) = ref [] in
+  let f x =
+    let var = Variable.of_literal x in
+    if not (Variable.equal var implied_var)
+    then (
+      match index t var with
+      | Some i -> parents := i :: !parents
+      | None -> add_to_learned_clause t x)
+  in
+  Array.iter ~f xs;
+  !parents
 ;;
 
 let create database trail conflict =
@@ -42,12 +70,13 @@ let create database trail conflict =
   ; decision_step
   ; num_steps
   ; flow
+  ; learned_clause = Set.empty (module Int)
   }
 ;;
 
 let analyze_conflict database trail conflict =
   let t = create database trail conflict in
   assert (trail_ends_at_conflict t);
-  ignore (t.database, t.conflict_step, t.decision_step, t.flow, index);
+  ignore (t.database, t.decision_step, t.flow, partition);
   t
 ;;
