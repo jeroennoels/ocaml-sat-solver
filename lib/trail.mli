@@ -24,7 +24,7 @@ val iter_down_until_last_decision : t -> f:(Variable.t -> Clause_id.t -> unit) -
 
 (* only for debugging, asserting, logging and testing *)
 
-val last_step_exn : t -> Variable.t
+val last_step_variable_exn : t -> Variable.t
 val show_assignment : t -> string
 val copy_unassigned : t -> Variable.t array
 val invariant : t -> bool

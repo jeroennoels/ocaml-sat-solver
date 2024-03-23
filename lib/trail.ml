@@ -135,7 +135,7 @@ let iter_down_until_last_decision (t : t) ~f =
   go t.length
 ;;
 
-let last_step_exn (t : t) =
+let last_step_variable_exn (t : t) =
   if t.length > 0
   then Variable.of_int_unchecked t.step_to_var.(t.length)
   else invalid_arg "empty trail"

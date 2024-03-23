@@ -24,9 +24,8 @@ let run database trail pipeline =
 
 let analyze database trail result =
   match result with
-  | None -> Stdio.print_endline "SAT"
-  | Some conflict ->
-    let todo = Analysis.analyze_conflict database trail conflict in
-    ignore todo;
-    Stdio.print_endline (Conflict.show conflict)
+  | None ->
+    Stdio.print_endline "SAT";
+    None
+  | Some conflict -> Some (Analysis.analyze_conflict database trail conflict)
 ;;

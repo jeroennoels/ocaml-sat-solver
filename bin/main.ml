@@ -22,7 +22,7 @@ let run cnf =
   Trail.set_logging trail true;
   Pipeline.set_logging pipeline false;
   let result = Driver.run database trail pipeline in
-  Driver.analyze database trail result;
+  ignore @@ Driver.analyze database trail result;
   Trail.set_logging trail false;
   Pipeline.set_logging pipeline false;
   print_endline (Trail.show_assignment trail);

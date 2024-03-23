@@ -8,15 +8,21 @@ let%test "driver" =
   Trail.set_logging trail true;
   Pipeline.set_logging pipeline false;
   let result = Driver.run database trail pipeline in
-  Driver.analyze database trail result;
+  let analysis = Driver.analyze database trail result in
   Trail.set_logging trail false;
   Pipeline.set_logging pipeline false;
   print_endline (Trail.show_assignment trail);
   let eval = Trail.eval_literal_nodeps trail in
   let counters = Cnf.evaluate cnf eval in
   print_endline (Cnf.show_counters counters);
-  Trail.iter_down_until_last_decision trail ~f:(fun var cid ->
-    printf "{%s|%s}" (Variable.show var) (Clause_id.show cid));
-  print_endline "";
-  Cnf.num_conflicting counters = 0
+  match analysis with
+  | None -> failwith "very unlikely to observe SAT here"
+  | Some conflict_analysis ->
+    let f var _ =
+      match Analysis.index conflict_analysis var with
+      | Some _ -> ()
+      | None -> failwith "unexpected missing index"
+    in
+    Trail.iter_down_until_last_decision trail ~f;
+    Cnf.num_conflicting counters = 0
 ;;
