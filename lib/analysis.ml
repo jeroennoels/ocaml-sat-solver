@@ -14,12 +14,14 @@ type t =
   }
 
 let get_conflict_variable (t : t) = t.conflict_variable
+let get_num_steps (t : t) = t.num_steps
 
 let print (t : t) =
   Stdio.printf
-    "conflict_variable = %s\nnum_steps = %d\n"
+    "conflict_variable = %s\nnum_steps = %d\nlearned_clause = [%s]\n"
     (Variable.show t.conflict_variable)
     t.num_steps
+    (Util.show_list (Set.to_list t.learned_clause) ~f:Int.to_string)
 ;;
 
 let add_to_learned_clause (t : t) (x : Literal.t) =
@@ -36,6 +38,7 @@ let trail_ends_at_conflict (t : t) : bool =
 let index (t : t) (var : Variable.t) : int option =
   let step = Trail.get_step t.trail var in
   let i = t.conflict_step - step in
+  assert (i >= 0);
   if i < t.num_steps then Some i else None
 ;;
 

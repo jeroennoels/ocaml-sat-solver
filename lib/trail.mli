@@ -9,6 +9,7 @@ type t
 
 val negate : option_bool -> option_bool
 val create : nbvar:int -> t
+val num_variables : t -> int
 val length : t -> int
 val is_complete : t -> bool
 val decide : t -> Variable.t -> bool -> Literal.t
@@ -23,10 +24,10 @@ val get_last_decision_step_exn : t -> int
 val iter_down_until_last_decision : t -> f:(Variable.t -> Clause_id.t -> unit) -> unit
 
 (* only for debugging, asserting, logging and testing *)
-
 val last_step_variable_exn : t -> Variable.t
 val show_assignment : t -> string
 val copy_unassigned : t -> Variable.t array
+val copy_assigned : t -> Variable.t array
 val invariant : t -> bool
 val set_logging : t -> bool -> unit
 val eval_literal_nodeps : t -> int -> bool option

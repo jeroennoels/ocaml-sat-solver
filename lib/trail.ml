@@ -11,7 +11,7 @@ let negate = function
   | Undefined -> Undefined
 ;;
 
-(* all our arrays below waste index zero to avoid offsetting *)
+(* all our arrays below waste index zero to avoid offsets *)
 
 type t =
   { step_to_var : int array
@@ -146,6 +146,13 @@ let copy_unassigned (t : t) =
   let pos = t.length + 1 in
   let copy = Array.subo t.step_to_var ~pos in
   Array.sort ~compare:Int.compare copy;
+  Array.map ~f:(Variable.of_int_check ~nbvar) copy
+;;
+
+let copy_assigned (t : t) =
+  let nbvar = num_variables t in
+  (* remember: index zero is not used *)
+  let copy = Array.sub t.step_to_var ~pos:1 ~len:t.length in
   Array.map ~f:(Variable.of_int_check ~nbvar) copy
 ;;
 
