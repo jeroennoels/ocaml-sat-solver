@@ -22,13 +22,16 @@ let run cnf =
   Trail.set_logging trail true;
   Pipeline.set_logging pipeline false;
   let result = Driver.run database trail pipeline in
-  ignore @@ Driver.analyze database trail result;
+  let analysis = Driver.analyze database trail result in
   Trail.set_logging trail false;
   Pipeline.set_logging pipeline false;
   print_endline (Trail.show_assignment trail);
   print_endline "----------------------------";
   let counters = Cnf.evaluate cnf (Trail.eval_literal_nodeps trail) in
-  print_endline (Cnf.show_counters counters)
+  print_endline (Cnf.show_counters counters);
+  match analysis with
+  | None -> print_endline "SAT"
+  | Some conflict_analysis -> Analysis.print conflict_analysis
 ;;
 
 let () =
