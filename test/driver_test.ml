@@ -18,9 +18,10 @@ let%test "driver" =
   match analysis with
   | None -> failwith "very unlikely to observe SAT here"
   | Some conflict_analysis ->
+    let i = ref 0 in
     let f var _ =
       match Analysis.index conflict_analysis var with
-      | Some _ -> ()
+      | Some j -> if j = !i then Int.incr i else failwith "wrong index"
       | None -> failwith "unexpected missing index"
     in
     Trail.iter_down_until_last_decision trail ~f;
