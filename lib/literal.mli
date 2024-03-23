@@ -10,3 +10,4 @@ val equal : t -> t -> bool
 val same_variable : t -> t -> bool
 val of_int_unchecked : int -> t
 val show : t -> string
+val array_of_int_set : (int, Int.comparator_witness) Set.t -> t array

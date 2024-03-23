@@ -17,6 +17,7 @@ let verify trail (analysis : Analysis.t) : bool =
   let parents = Analysis.partition analysis conflict_variable xs in
   let num_steps = Analysis.get_num_steps analysis in
   List.equal Int.equal parents (List.range 0 ~stop:`exclusive num_steps)
+  && Trail.length trail = num_steps + Array.length (Analysis.get_learned_clause analysis)
 ;;
 
 let%test "driver" =

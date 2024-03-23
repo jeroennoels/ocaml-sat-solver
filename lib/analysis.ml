@@ -15,6 +15,7 @@ type t =
 
 let get_conflict_variable (t : t) = t.conflict_variable
 let get_num_steps (t : t) = t.num_steps
+let get_learned_clause (t : t) = Literal.array_of_int_set t.learned_clause
 
 let print (t : t) =
   Stdio.printf
