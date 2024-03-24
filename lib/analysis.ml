@@ -57,6 +57,32 @@ let partition (t : t) implied_var (xs : Literal.t array) : int list =
   !parents
 ;;
 
+let sum_flow_for_assert (flow : int array) (indices : int list) =
+  (* because we did not remove duplicates from [conflict_antecendent_dirty] *)
+  let uniqs = List.dedup_and_sort ~compare:Int.compare indices in
+  List.fold uniqs ~init:0 ~f:(fun a i -> a + flow.(i))
+;;
+
+let split_flow (flow : int array) (input : int) (indices : int list) =
+  match indices with
+  | [] -> ()
+  | [ i ] -> flow.(i) <- flow.(i) + input
+  | _ ->
+    let n = List.length indices in
+    let q, r = input /% n, input % n in
+    let f i j = flow.(j) <- (flow.(j) + if i < r then q + 1 else q) in
+    List.iteri indices ~f
+;;
+
+let split_flow_assert (flow : int array) (input : int) (indices : int list) =
+  let before = ref (-1) in
+  assert (
+    before := sum_flow_for_assert flow indices;
+    !before >= 0);
+  split_flow flow input indices;
+  assert (!before + input = sum_flow_for_assert flow indices)
+;;
+
 let create database trail conflict =
   let conflict_variable = Conflict.variable conflict in
   let a1 = Database.get_literals database (Conflict.antecedent1 conflict) in
@@ -81,6 +107,9 @@ let create database trail conflict =
 let analyze_conflict database trail conflict =
   let t = create database trail conflict in
   assert (trail_ends_at_conflict t);
-  ignore (t.database, t.decision_step, t.flow, partition);
+  let nodes = partition t t.conflict_variable t.conflict_antecendent_dirty in
+  print t;
+  split_flow_assert t.flow Int.max_value nodes;
+  ignore (t.database, t.decision_step);
   t
 ;;
