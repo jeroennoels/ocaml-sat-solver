@@ -24,13 +24,9 @@ type t =
 
 let create ~nbvar =
   let len = nbvar + 1 in
-  let step_to_var = Array.create ~len 0 in
-  let var_to_step = Array.create ~len 0 in
+  let step_to_var = Array.init len ~f:Fn.id in
+  let var_to_step = Array.init len ~f:Fn.id in
   let step_to_clause_id = Array.create ~len Clause_id.invalid_as_int in
-  for i = 1 to nbvar do
-    step_to_var.(i) <- i;
-    var_to_step.(i) <- i
-  done;
   { step_to_var
   ; var_to_step
   ; step_to_clause_id
