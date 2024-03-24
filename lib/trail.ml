@@ -117,7 +117,7 @@ let get_last_decision_step_exn (t : t) : int =
   | Some decision_step -> decision_step
 ;;
 
-let iter_down_until_last_decision (t : t) ~f =
+let iteri_down_until_last_decision (t : t) ~f =
   let decision_step = get_last_decision_step_exn t in
   assert (t.length >= decision_step);
   let rec go i =
@@ -125,7 +125,7 @@ let iter_down_until_last_decision (t : t) ~f =
     then (
       let var = Variable.of_int_unchecked t.step_to_var.(i) in
       let cid = Clause_id.of_int t.step_to_clause_id.(i) in
-      f var cid;
+      f (t.length - i) var cid;
       go (i - 1))
   in
   go t.length

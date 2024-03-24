@@ -66,10 +66,13 @@ let sum_flow_for_assert (flow : int array) (indices : int list) =
 let split_flow (flow : int array) (input : int) (indices : int list) =
   match indices with
   | [] -> ()
-  | [ i ] -> flow.(i) <- flow.(i) + input
+  | [ i ] ->
+    assert (input > 0);
+    flow.(i) <- flow.(i) + input
   | _ ->
     let n = List.length indices in
     let q, r = input /% n, input % n in
+    assert (q > 0);
     let f i j = flow.(j) <- (flow.(j) + if i < r then q + 1 else q) in
     List.iteri indices ~f
 ;;
@@ -104,12 +107,28 @@ let create database trail conflict =
   }
 ;;
 
+let learned_clause_is_conflicting (t : t) : bool =
+  let eval = Trail.eval_literal_nodeps t.trail in
+  Cnf.conflicting eval (Set.to_array t.learned_clause)
+;;
+
+let visit (t : t) i var cid =
+  let xs = Database.get_literals t.database cid in
+  let parents = partition t var xs in
+  let input = t.flow.(i) in
+  Stdio.printf "\n i = %d, input = %d " i input;
+  if input > 0 then split_flow_assert t.flow input parents
+;;
+
 let analyze_conflict database trail conflict =
   let t = create database trail conflict in
   assert (trail_ends_at_conflict t);
-  let nodes = partition t t.conflict_variable t.conflict_antecendent_dirty in
-  print t;
-  split_flow_assert t.flow Int.max_value nodes;
-  ignore (t.database, t.decision_step);
+  let conflict_parents = partition t t.conflict_variable t.conflict_antecendent_dirty in
+  split_flow_assert t.flow Int.max_value conflict_parents;
+  Trail.iteri_down_until_last_decision t.trail ~f:(visit t);
+  let i = t.num_steps - 1 in
+  Stdio.printf "\n --- i = %d, input = %d \n " i t.flow.(i);
+  assert (learned_clause_is_conflicting t);
+  ignore t.decision_step;
   t
 ;;

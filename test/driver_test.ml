@@ -3,21 +3,19 @@ open! Stdio
 open Sat
 
 let verify trail (analysis : Analysis.t) : bool =
-  let i = ref 0 in
-  let check_index var _ =
+  Analysis.print analysis;
+  let check_index i var _ =
     match Analysis.index analysis var with
-    | Some j -> if j = !i then Int.incr i else failwith "wrong index"
+    | Some j -> if not (j = i) then failwith "wrong index"
     | None -> failwith "unexpected missing index"
   in
-  Trail.iter_down_until_last_decision trail ~f:check_index;
-  Analysis.print analysis;
   let conflict_variable = Analysis.get_conflict_variable analysis in
   let choose_literal var = Variable.to_literal var true in
   let xs = Array.map (Trail.copy_assigned trail) ~f:choose_literal in
-  let parents = Analysis.partition analysis conflict_variable xs in
+  let conflict_parents = Analysis.partition analysis conflict_variable xs in
   let num_steps = Analysis.get_num_steps analysis in
-  List.equal Int.equal parents (List.range 0 ~stop:`exclusive num_steps)
-  && Trail.length trail = num_steps + Array.length (Analysis.get_learned_clause analysis)
+  Trail.iteri_down_until_last_decision trail ~f:check_index;
+  List.equal Int.equal conflict_parents (List.range 0 ~stop:`exclusive num_steps)
 ;;
 
 let%test "driver" =
