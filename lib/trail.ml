@@ -77,6 +77,7 @@ let decide (t : t) v b =
 ;;
 
 let get_step (t : t) var = Int.abs t.var_to_step.(Variable.to_int var)
+let get_variable_at_step (t : t) i = Variable.of_int_unchecked t.step_to_var.(i)
 
 let backjump (t : t) ~length =
   t.length <- length;

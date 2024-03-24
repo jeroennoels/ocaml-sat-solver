@@ -15,6 +15,7 @@ val is_complete : t -> bool
 val decide : t -> Variable.t -> bool -> Literal.t
 val step : t -> Literal.t * Clause_id.t -> unit
 val get_step : t -> Variable.t -> int
+val get_variable_at_step : t -> int -> Variable.t
 val backjump : t -> length:int -> unit
 val eval_variable : t -> Variable.t -> option_bool
 val eval_literal : t -> Literal.t -> option_bool

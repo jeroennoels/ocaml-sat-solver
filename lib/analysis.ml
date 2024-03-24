@@ -112,11 +112,15 @@ let learned_clause_is_conflicting (t : t) : bool =
   Cnf.conflicting eval (Set.to_array t.learned_clause)
 ;;
 
+(** to short-circuit when a UIP is found *)
+exception Short of Variable.t
+
 let visit (t : t) i var cid =
-  let xs = Database.get_literals t.database cid in
-  let parents = partition t var xs in
   let input = t.flow.(i) in
   Stdio.printf "\n i = %d, input = %d " i input;
+  if input = Int.max_value then raise (Short var);
+  let xs = Database.get_literals t.database cid in
+  let parents = partition t var xs in
   if input > 0 then split_flow_assert t.flow input parents
 ;;
 
@@ -125,10 +129,21 @@ let analyze_conflict database trail conflict =
   assert (trail_ends_at_conflict t);
   let conflict_parents = partition t t.conflict_variable t.conflict_antecendent_dirty in
   split_flow_assert t.flow Int.max_value conflict_parents;
-  Trail.iteri_down_until_last_decision t.trail ~f:(visit t);
-  let i = t.num_steps - 1 in
-  Stdio.printf "\n --- i = %d, input = %d \n " i t.flow.(i);
+  let uip : Variable.t =
+    try
+      Trail.iteri_down_until_last_decision t.trail ~f:(visit t);
+      Trail.get_variable_at_step t.trail t.decision_step
+    with
+    | Short first_uip -> first_uip
+  in
+  let uip_value_negated =
+    match Trail.eval_variable t.trail uip with
+    | True -> false
+    | False -> true
+    | Undefined -> failwith "undefined UIP value"
+  in
+  let uip_literal = Variable.to_literal uip uip_value_negated in
+  add_to_learned_clause t uip_literal;
   assert (learned_clause_is_conflicting t);
-  ignore t.decision_step;
   t
 ;;
