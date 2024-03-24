@@ -10,23 +10,23 @@ type t =
   ; decision_step : int
   ; num_steps : int (* between last decision and conflict *)
   ; flow : int array
-  ; mutable learned_clause : (int, Int.comparator_witness) Set.t
+  ; mutable conflict_clause : (int, Int.comparator_witness) Set.t
   }
 
 let get_conflict_variable (t : t) = t.conflict_variable
 let get_num_steps (t : t) = t.num_steps
-let get_learned_clause (t : t) = Literal.array_of_int_set t.learned_clause
+let get_conflict_clause (t : t) = Literal.array_of_int_set t.conflict_clause
 
 let print (t : t) =
   Stdio.printf
-    "conflict_variable = %s\nnum_steps = %d\nlearned_clause = [%s]\n"
+    "conflict_variable = %s\nnum_steps = %d\nconflict_clause = [%s]\n"
     (Variable.show t.conflict_variable)
     t.num_steps
-    (Util.show_list (Set.to_list t.learned_clause) ~f:Int.to_string)
+    (Util.show_list (Set.to_list t.conflict_clause) ~f:Int.to_string)
 ;;
 
-let add_to_learned_clause (t : t) (x : Literal.t) =
-  t.learned_clause <- Set.add t.learned_clause (Literal.to_int x)
+let add_to_conflict_clause (t : t) (x : Literal.t) =
+  t.conflict_clause <- Set.add t.conflict_clause (Literal.to_int x)
 ;;
 
 let trail_ends_at_conflict (t : t) : bool =
@@ -51,7 +51,7 @@ let partition (t : t) implied_var (xs : Literal.t array) : int list =
     then (
       match index t var with
       | Some i -> parents := i :: !parents
-      | None -> add_to_learned_clause t x)
+      | None -> add_to_conflict_clause t x)
   in
   Array.iter ~f xs;
   !parents
@@ -103,13 +103,13 @@ let create database trail conflict =
   ; decision_step
   ; num_steps
   ; flow
-  ; learned_clause = Set.empty (module Int)
+  ; conflict_clause = Set.empty (module Int)
   }
 ;;
 
-let learned_clause_is_conflicting (t : t) : bool =
+let conflict_clause_is_conflicting (t : t) : bool =
   let eval = Trail.eval_literal_nodeps t.trail in
-  Cnf.conflicting eval (Set.to_array t.learned_clause)
+  Cnf.conflicting eval (Set.to_array t.conflict_clause)
 ;;
 
 (** to short-circuit when a UIP is found *)
@@ -136,14 +136,16 @@ let analyze_conflict database trail conflict =
     with
     | Short first_uip -> first_uip
   in
-  let uip_value_negated =
+  let uip_value =
     match Trail.eval_variable t.trail uip with
-    | True -> false
-    | False -> true
+    | True -> true
+    | False -> false
     | Undefined -> failwith "undefined UIP value"
   in
-  let uip_literal = Variable.to_literal uip uip_value_negated in
-  add_to_learned_clause t uip_literal;
-  assert (learned_clause_is_conflicting t);
+  (* before adding the UIP *)
+  assert (conflict_clause_is_conflicting t);
+  (* negate? *)
+  let uip_literal = Variable.to_literal uip uip_value in
+  add_to_conflict_clause t uip_literal;
   t
 ;;
