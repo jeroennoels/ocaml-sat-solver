@@ -3,7 +3,8 @@ open! Base
 type t
 
 val analyze_conflict : Database.t -> Trail.t -> Conflict.t -> t
-val get_learned_clause : t -> Literal.t array
+val get_learned_clause_exn : t -> Literal.t array
+val get_uip_literal : t -> Literal.t option
 
 (* exposed for testing and debugging *)
 val get_conflict_variable : t -> Variable.t
