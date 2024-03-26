@@ -62,3 +62,5 @@ let create cnf =
   let nbvar = Cnf.num_variables cnf in
   { clauses; negative; positive; nbvar }
 ;;
+
+let add_learned_clause (_t : t) _xs = ()

@@ -8,7 +8,7 @@ let initialize cnf =
   database, trail, pipeline
 ;;
 
-let run database trail pipeline =
+let run database trail pipeline : Conflict.t option =
   let rec go () =
     match Trail.is_complete trail with
     | true -> None
@@ -22,10 +22,21 @@ let run database trail pipeline =
   go ()
 ;;
 
-let analyze database trail result =
+let analyze database trail (result : Conflict.t option) =
   match result with
-  | None ->
-    Stdio.print_endline "SAT";
-    None
+  | None -> None
   | Some conflict -> Some (Analysis.analyze_conflict database trail conflict)
+;;
+
+(** short-circuit wheb SAT is observed *)
+exception Short_sat of Trail.t
+
+let drive database trail pipeline =
+  let analysis =
+    match run database trail pipeline with
+    | None -> raise (Short_sat trail)
+    | Some conflict -> Analysis.analyze_conflict database trail conflict
+  in
+  let clause = Analysis.get_learned_clause_exn analysis in
+  Database.add_learned_clause database clause
 ;;
