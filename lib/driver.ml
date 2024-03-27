@@ -38,5 +38,8 @@ let drive database trail pipeline =
     | Some conflict -> Analysis.analyze_conflict database trail conflict
   in
   let clause = Analysis.get_learned_clause_exn analysis in
-  Database.add_learned_clause database clause
+  Database.add_learned_clause database clause;
+  analysis
 ;;
+
+let () = ignore drive
