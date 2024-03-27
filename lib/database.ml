@@ -90,11 +90,12 @@ let push_learned (t : t) (cid : clause_id) (x : literal) =
   a.(v) <- copy_extend a.(v) cid
 ;;
 
-let add_learned_clause (t : t) xs =
+let add_learned_clause (t : t) xs : clause_id =
   let i = t.num_learned in
   t.learned_clauses.(i) <- xs;
   let cid = Clause_id.of_int (t.num_clauses + i) in
   let f x = push_learned t cid x in
   Array.iter xs ~f;
-  t.num_learned <- i + 1
+  t.num_learned <- i + 1;
+  cid
 ;;

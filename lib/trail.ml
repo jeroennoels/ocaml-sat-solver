@@ -84,7 +84,14 @@ let get_variable_at_step (t : t) i = Variable.of_int_unchecked t.step_to_var.(i)
 
 let backjump (t : t) ~length =
   t.length <- length;
-  t.last_decision_step <- None
+  if t.step_to_clause_id.(length) < 0
+  then t.last_decision_step <- Some length
+  else (
+    let rec search i =
+      if i = 0 || t.step_to_clause_id.(i) < 0 then i else search (i - 1)
+    in
+    let j = search length in
+    t.last_decision_step <- (if j = 0 then None else Some j))
 ;;
 
 let eval_variable (t : t) var =

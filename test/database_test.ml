@@ -21,7 +21,7 @@ let make_database () =
   let cnf = Cnf.create 6 clauses in
   Verify_input.verify cnf;
   let database = Database.create cnf in
-  let learn ints = Database.add_learned_clause database (literals ints) in
+  let learn ints = ignore (Database.add_learned_clause database (literals ints)) in
   learn [| -2; -3; -4 |];
   learn [| 1; 2; -5; 6 |];
   learn [| -1; 6 |];

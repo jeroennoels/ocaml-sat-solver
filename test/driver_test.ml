@@ -42,7 +42,7 @@ let run_once () =
   let cnf = Result.ok_or_failwith (Dimacs.read_lines Examples.factoring) in
   let database, trail, pipeline = Driver.initialize cnf in
   Trail.set_logging trail log;
-  let result = Driver.run database trail pipeline in
+  let result = Driver.run database trail pipeline None in
   let analysis = Driver.analyze database trail result in
   let eval = Trail.eval_literal_nodeps trail in
   let counters = Cnf.evaluate cnf eval in
