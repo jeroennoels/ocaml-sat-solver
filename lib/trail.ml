@@ -44,7 +44,7 @@ let invariant (t : t) =
   Array.for_alli ~f t.var_to_step
 ;;
 
-let step_internal (t : t) (x : Literal.t) : unit =
+let step_internal (t : t) (x : Literal.t) : int =
   assert (t.length < num_variables t);
   let var = Variable.of_literal x in
   let pos = Literal.is_positive x in
@@ -58,21 +58,24 @@ let step_internal (t : t) (x : Literal.t) : unit =
   t.step_to_var.(i) <- v;
   t.step_to_var.(j) <- w;
   t.var_to_step.(v) <- (if pos then i else -i);
-  t.var_to_step.(w) <- (if pos then j else -j)
+  t.var_to_step.(w) <- (if pos then j else -j);
+  i
 ;;
 
 let step (t : t) (x, cid) : unit =
   if t.log then Stdio.printf "%d " (Literal.to_int x);
-  step_internal t x;
-  t.step_to_clause_id.(t.length) <- Clause_id.to_int cid
+  let i = step_internal t x in
+  (* after taking the step *)
+  t.step_to_clause_id.(i) <- Clause_id.to_int cid
 ;;
 
 let decide (t : t) v b =
   let x = Variable.to_literal v b in
   if t.log then Stdio.printf "[%d] " (Literal.to_int x);
-  step_internal t x;
-  t.last_decision_step <- Some t.length;
-  t.step_to_clause_id.(t.length) <- Clause_id.invalid_as_int;
+  let i = step_internal t x in
+  (* after taking the decision *)
+  t.last_decision_step <- Some i;
+  t.step_to_clause_id.(i) <- Clause_id.invalid_as_int;
   x
 ;;
 
@@ -130,6 +133,14 @@ let iteri_down_until_last_decision (t : t) ~f =
       go (i - 1))
   in
   go t.length
+;;
+
+let fast_forward_to_next_decision (t : t) (step : int) =
+  assert (step < get_last_decision_step_exn t);
+  (* negative clause_id means decision step *)
+  let start = if t.step_to_clause_id.(step) < 0 then step + 1 else step in
+  let rec search i = if t.step_to_clause_id.(i) < 0 then i else search (i + 1) in
+  search start
 ;;
 
 let last_step_variable_exn (t : t) =

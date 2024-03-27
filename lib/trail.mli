@@ -22,6 +22,7 @@ val eval_literal : t -> Literal.t -> option_bool
 val is_assigned : t -> Literal.t -> bool
 val random_unassigned_exn : t -> Variable.t
 val get_last_decision_step_exn : t -> int
+val fast_forward_to_next_decision : t -> int -> int
 
 val iteri_down_until_last_decision
   :  t

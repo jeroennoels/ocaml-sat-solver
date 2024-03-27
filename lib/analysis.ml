@@ -19,6 +19,17 @@ let get_conflict_variable (t : t) = t.conflict_variable
 let get_num_steps (t : t) = t.num_steps
 let get_uip_literal (t : t) = t.uip_literal
 
+let calculate_backjump_step (t : t) =
+  let f (highest : int) (x : int) =
+    let var = Variable.of_literal (Literal.of_int_unchecked x) in
+    let step = Trail.get_step t.trail var in
+    if step > highest then step else highest
+  in
+  let highest = Set.fold ~init:0 ~f t.premises in
+  let ff_decision_step = Trail.fast_forward_to_next_decision t.trail highest in
+  ff_decision_step - 1
+;;
+
 let get_learned_clause_exn (t : t) =
   match t.uip_literal with
   | Some x ->

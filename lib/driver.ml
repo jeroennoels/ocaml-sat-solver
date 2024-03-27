@@ -39,7 +39,9 @@ let drive database trail pipeline =
   in
   let clause = Analysis.get_learned_clause_exn analysis in
   Database.add_learned_clause database clause;
+  let backjump_step = Analysis.calculate_backjump_step analysis in
+  let v = Trail.get_variable_at_step trail backjump_step in
+  Stdio.printf "\nbackjump step = %d, variable = %s\n" backjump_step (Variable.show v);
+  Trail.backjump trail ~length:backjump_step;
   analysis
 ;;
-
-let () = ignore drive
