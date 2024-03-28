@@ -70,7 +70,7 @@ let%expect_test "find units" =
   Verify_input.verify cnf;
   let units = Propagation.find_units (Database.create cnf) eval (literal (-4)) in
   print_endline @@ String.concat ~sep:" " (List.map ~f:show_unit units);
-  [%expect {| (8, 0) (9, 1) (8, 4) |}]
+  [%expect {| (9, 1) (8, 4) (8, 0) |}]
 ;;
 
 let%expect_test "propagate" =

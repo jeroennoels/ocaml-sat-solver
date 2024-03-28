@@ -21,7 +21,7 @@ let run cnf =
   let database, trail, pipeline = Driver.initialize cnf in
   Trail.set_logging trail false;
   Driver.solve database trail pipeline;
-  print_endline (Trail.show_assignment trail);
+  (* print_endline (Trail.show_assignment trail); *)
   print_endline "----------------------------";
   let counters = Cnf.evaluate cnf (Trail.eval_literal_nodeps trail) in
   print_endline (Cnf.show_counters counters)

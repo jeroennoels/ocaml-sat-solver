@@ -64,5 +64,6 @@ let solve database trail pipeline =
     | Some x -> Some (Literal.negate x, learned_clause_id)
     | None -> None
   in
-  loop None
+  try loop None with
+  | Short_sat _ -> Stdio.print_endline "SAT"
 ;;

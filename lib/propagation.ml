@@ -24,14 +24,12 @@ let find_unit (eval : literal -> option_bool) (clause : literal array) =
 let find_units database (eval : literal -> option_bool) (x : literal)
   : (literal * clause_id) list
   =
-  let relevant_clauses = Database.get_clause_ids database (Literal.negate x) in
-  let f units cid =
-    let xs = Database.get_literals database cid in
+  let f units xs cid =
     match find_unit eval xs with
     | Some y -> (y, cid) :: units
     | None -> units
   in
-  Array.fold ~init:[] ~f relevant_clauses
+  Database.fold_over_clauses_containing database ~f (Literal.negate x)
 ;;
 
 let propagate database trail pipeline kickoff =
